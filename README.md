@@ -1,7 +1,7 @@
 # PumasLogistics
 This is the official repository of Team Pumas, participants in the RoboCup Logistics League.
 
-#Install
+# Install
 After copying the repository, run inside the repository folder _~/PumasLogistics/_:
 ```bash
 git submodule update --init --recursive
