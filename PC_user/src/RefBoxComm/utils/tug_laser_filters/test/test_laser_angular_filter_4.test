@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+  <test test-name="test_laser_angular_filter_4" pkg="lta_laser_filter" type="test_laser_angular_filter_4" time-limit="10.0">
+    <rosparam command="load" file="$(find lta_laser_filter)/test/test_laser_angular_filter_4.yaml" />
+  </test>
+
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter" output="screen">
+    <rosparam command="load" file="$(find lta_laser_filter)/test/test_laser_angular_filter_4.yaml" />
+    <remap from="scan" to="/scan_raw" />
+    <remap from="scan_filtered" to="/scan_filtered"/>
+  </node>
+</launch>

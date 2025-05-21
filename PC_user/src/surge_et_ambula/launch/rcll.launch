@@ -1,0 +1,9 @@
+<launch>
+    <include file="$(find freenect_launch)/launch/freenect.launch" />
+
+    <node name="move_base" pkg="simple_move" type="move_base" output="screen" />
+    <node name="aling_with_line" pkg="simple_move" type="aling_with_line" output="screen" />
+    <node name="aruco_tf_srv" pkg="img_proc" type="aruco_tf_srv" output="screen" />
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation_JM.rviz"/>
+</launch>

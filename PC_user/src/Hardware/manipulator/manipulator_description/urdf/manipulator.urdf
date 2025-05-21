@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<robot name="prismatic_example">
+
+  <!-- Material -->
+  <material name="grey">
+    <color rgba="0.6 0.6 0.6 1.0"/>
+  </material>
+
+  <!-- AluminumBase -->
+  <link name="platform_link">    
+    <!-- <visual>
+      <geometry>
+        <mesh filename="package://manipulator_description/meshes/AluminumBase.stl" scale="0.001 0.001 0.001"/>  
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://manipulator_description/meshes/AluminumBase.stl" scale="0.001 0.001 0.001"/> 
+      </geometry>
+    </collision> -->
+  </link>
+
+  <!-- AxisX -->
+  <link name="AxisX_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://manipulator_description/meshes/AxisX.stl" scale="0.001 0.001 0.001"/>  
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://manipulator_description/meshes/AxisX.stl" scale="0.001 0.001 0.001"/> 
+      </geometry>
+    </collision>
+  </link>
+  
+  <!-- AxisY-->
+  <link name="AxisY_link">
+    <visual> 
+      <geometry>
+        <mesh filename="package://manipulator_description/meshes/AxisY.stl" scale="0.001 0.001 0.001"/>  
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://manipulator_description/meshes/AxisY.stl" scale="0.001 0.001 0.001"/> 
+      </geometry>
+    </collision>
+  </link>
+  
+  <!-- AxisZ-->
+  <link name="AxisZ_link">
+    <visual> 
+      <geometry>
+        <mesh filename="package://manipulator_description/meshes/AxisZ.stl" scale="0.001 0.001 0.001"/>  
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://manipulator_description/meshes/AxisZ.stl" scale="0.001 0.001 0.001"/> 
+      </geometry>
+    </collision>
+  </link>
+
+    
+  <!-- Claw-->
+  <link name="MovingPlate_link">
+    <visual> 
+      <geometry>
+        <mesh filename="package://manipulator_description/meshes/MovingPlate.stl" scale="0.001 0.001 0.001"/>  
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://manipulator_description/meshes/MovingPlate.stl" scale="0.001 0.001 0.001"/> 
+      </geometry>
+    </collision>
+  </link>
+
+  <!--Joints-->
+  <joint name="AxisX_joint" type="fixed">
+    <parent link="platform_link"/>
+    <child link="AxisX_link"/>
+    <origin xyz="-0.115 -0.160 0.0015" rpy="0 0 0" />
+  </joint>
+
+  <joint name="AxisY_joint" type="prismatic">
+    <parent link="AxisX_link"/>
+    <child link="AxisY_link"/>
+    <origin xyz="-0.01 0.308 0.0225" rpy="1.5708 0 0" />  <!-- 1.5708 rad = 90° -->
+    <axis xyz="0 0 1"/>
+    <limit lower="0" upper="0.234" effort="0.1" velocity="0.1"/>
+  </joint>
+ 
+  <joint name="AxisZ_joint" type="prismatic">
+    <parent link="AxisY_link"/>
+    <child link="AxisZ_link"/>
+    <origin xyz="0.039 0.08 0.006" rpy="-1.5708 0 0" /> 
+    <axis xyz="1 0 0"/>
+    <limit lower="0" upper="0.105" effort="0.1" velocity="0.1"/>
+  </joint>
+
+  <joint name="MovingPlate_joint" type="prismatic">
+    <parent link="AxisZ_link"/>
+    <child link="MovingPlate_link"/>
+    <origin xyz="-0.032 -0.076 0.38" rpy="-1.5708 3.1415 0" /> 
+    <axis xyz="0 1 0"/>
+    <limit lower="0" upper="0.18" effort="0.1" velocity="0.1"/>
+  </joint>
+
+</robot>

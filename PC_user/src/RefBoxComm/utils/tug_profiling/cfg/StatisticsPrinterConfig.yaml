@@ -1,0 +1,2 @@
+print_statistics: { type: bool, default: true, description: "Print profiling statistics regularly", dynamic: true }
+print_statistics_interval: { type: double, unit: "s", default: 10.0, min: 1.e-9, max: 60.0, description: "Interval for printing profiling statistics", dynamic: true }

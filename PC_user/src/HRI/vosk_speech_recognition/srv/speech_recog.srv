@@ -1,0 +1,5 @@
+bool is_speech_recog_enabled
+string grammar
+---
+bool success
+string text_recog

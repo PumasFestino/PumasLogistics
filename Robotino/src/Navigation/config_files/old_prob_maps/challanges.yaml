@@ -1,0 +1,7 @@
+image: challanges.pgm
+resolution: 0.0085284
+origin: [-5.000000, 0.000000, 0] # 3rd parameter - yaw
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+

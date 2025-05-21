@@ -1,0 +1,10 @@
+scan_filter_chain:
+- name: angular_filter
+  type: laser_filters/LaserScanAngularFilter
+  params:
+    angles_to_remove:
+    - lower_angle: -0.45
+      upper_angle: -0.05
+
+send_laser_range_values: [1.0, 0.1, 1.0, 1.5, .NaN, 9.0, 1.0, 1.0, 1.0, 2.3]
+required_laser_range_values: [1.0, .NaN, .NaN, .NaN, .NaN, 9.0, 1.0, 1.0, 1.0, 2.3]

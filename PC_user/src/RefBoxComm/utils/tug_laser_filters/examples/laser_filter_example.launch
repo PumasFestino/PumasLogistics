@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter" output="screen">
+    <rosparam command="load" file="$(find lta_laser_filter)/examples/laser_filter_example.yaml" />
+    <remap from="scan" to="/scan_raw" />
+    <remap from="scan_filtered" to="/scan"/>
+  </node>
+</launch>

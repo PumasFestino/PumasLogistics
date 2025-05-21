@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="tf" type="static_transform_publisher" name="Zone1_BC" args="-2 -2 0 0 0 0 1 map M_Z12 100" />
+	<node pkg="tf" type="static_transform_publisher" name="Zone2_BC" args="1 1 0 0 0 0 1 map M_Z22 100" />
+</launch>

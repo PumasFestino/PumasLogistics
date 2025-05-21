@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>pose_estimation</name>
+  <version>0.0.0</version>
+  <description>Package for 2D/3D human pose estimation and visualization</description>
+
+  <maintainer email="joshua@todo.todo">joshua</maintainer>
+  <license>BSD</license>
+
+  <!-- Dependencias básicas -->
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <!-- Dependencias de build -->
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>visualization_msgs</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>message_generation</build_depend>
+
+  <!-- Dependencias de exportación -->
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <build_export_depend>sensor_msgs</build_export_depend>
+  <build_export_depend>visualization_msgs</build_export_depend>
+  <build_export_depend>cv_bridge</build_export_depend>
+
+  <!-- Dependencias de ejecución -->
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>python-opencv</exec_depend>
+  <exec_depend>python-numpy</exec_depend>
+
+  <!-- Dependencias para tests (opcional) -->
+  <test_depend>rostest</test_depend>
+
+  <export>
+    <!-- Puedes añadir configuraciones específicas para otros tools aquí -->
+  </export>
+</package>

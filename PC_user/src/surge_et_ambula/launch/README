@@ -1,0 +1,37 @@
+															
+########################  STATE-MACHINES USAGE  ########################
+
+############ NAVIGATION
+
+$ roslaunch surge_et_ambula navigation_challenge_track.launch
+
+### Launches
+	-Navigation
+
+### Nodes
+	-Speaker
+
+############ EXPLORATION
+
+$ roslaunch surge_et_ambula exploration_challenge_track.launch
+
+### Launches
+	-Freenect
+	-Navigation
+
+### Nodes
+	-Speaker
+	-Aruco_det_srv
+
+############ GRASPING + PRODUCTION
+
+$ roslaunch surge_et_ambula grasp_prod_challenge_track.launch
+
+### Launches
+	-Freenect
+	-Navigation
+
+### Nodes
+	-Speaker
+	-piece_det_srv
+

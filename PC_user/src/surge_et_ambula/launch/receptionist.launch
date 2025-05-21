@@ -1,0 +1,16 @@
+<launch>
+     <include file="$(find freenect_launch)/launch/freenect.launch" />
+     <include file="$(find vosk_speech_recognition)/launch/vosk_recog.launch" >
+     	<arg name="grammar" value="$(find vosk_speech_recognition)/grammars/receptionist.json"  />
+     </include>
+ 
+     <node name="move_base" pkg="simple_move" type="move_base" output="screen" />
+     <node name="aling_with_line" pkg="simple_move" type="aling_with_line" output="screen" />
+     <node name="aruco_tf_srv" pkg="img_proc" type="aruco_tf_srv" output="screen" />
+     <node name="speaker" pkg="robotino_talk" type="speaker.py"/>
+ 	<node name="known_location_parser" pkg="known_locations_parser" type='known_location_server.py'/>
+ 	<node name="face_train_server" pkg="face_recog" type="face_train_server.py"/>
+	<node name="recog_face_server" pkg="face_recog" type="recog_face_server.py"/>
+     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation_JM.rviz"/>
+
+ </launch>

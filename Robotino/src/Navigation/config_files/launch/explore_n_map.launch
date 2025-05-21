@@ -1,0 +1,59 @@
+<launch>
+
+	<node name="scan_cleaner" pkg="act_pln" type="scan_cleaner" output="screen"/>
+
+	<!-- Some general parameters -->
+	<!--param name="use_sim_time" value="true" /-->
+	<rosparam file="$(find config_files)/rosnav_params/ros.yaml"/>
+
+	<!-- Start Stage simulator with a given environment -->
+	<!--node name="Stage" pkg="stage_ros" type="stageros" args="$(find nav2d_tutorials)/world/tutorial.world">
+		<param name="base_watchdog_timeout" value="0" />
+	</node-->
+
+	<!-- Start the Operator to control the simulated robot -->
+	<node name="Operator" pkg="nav2d_operator" type="operator" >
+		<!--remap from="scan" to="base_scan"/-->
+		<rosparam file="$(find config_files)/rosnav_params/operator.yaml"/>
+		<rosparam file="$(find config_files)/rosnav_params/costmap.yaml" ns="local_map" />
+	</node>
+
+	<!-- Start Mapper to genreate map from laser scans -->
+	<node name="Mapper" pkg="nav2d_karto" type="mapper">
+		<!--remap from="scan" to="base_scan"/-->
+		<!--rosparam file="$(find config_files)/maps/Lab_arena_hor_clean.yaml"/-->
+	<!--/node-->
+
+	<!--node name="Mapper" pkg="gmapping" type="slam_gmapping"-->
+		<rosparam file="$(find config_files)/rosnav_params/mapper.yaml"/>
+	</node>
+
+	<!-- Start the Navigator to move the robot autonomously -->
+	<node name="Navigator" pkg="nav2d_navigator" type="navigator">
+		<rosparam file="$(find config_files)/rosnav_params/navigator.yaml"/>
+	</node>
+
+	<node name="GetMap" pkg="nav2d_navigator" type="get_map_client" />
+	<node name="Explore" pkg="nav2d_navigator" type="explore_client" />
+	<node name="SetGoal" pkg="nav2d_navigator" type="set_goal_client" />
+
+	<!-- Start the joystick-driver and remote-controller for operation-->
+	<!--node name="Joystick" pkg="joy" type="joy_node" />
+	<node name="Remote" pkg="nav2d_remote" type="remote_joy" >
+		<rosparam file="$(find config_files)/rosnav_params/remote.yaml"/>
+	</node-->
+
+	<node name="RVIZ" pkg="rviz" type="rviz" args=" -d $(find config_files)/rosnav_params/step_nav.rviz" />
+
+
+	<!--include file="$(find surge_et_ambula)/launch/robot_comm.launch"/-->
+
+	<!--include file="$(find freenect_launch)/launch/freenect.launch"/-->
+
+	<!--node pkg="tf" type="static_transform_publisher" name="Log_origin_BC" args="0 0 0 0 0 0 1 map Log_origin 100" /-->
+	<!--include file="$(find movement_functions)/launch/logisticsZones.launch"> </include-->
+	<!--node name="shortmv" pkg="simple_move" type="shortmv_rosnav" output="screen"/-->
+	<!--node name="aruco_det_srv_array" pkg="img_proc" type="aruco_det_srv_array.py" output="screen"/-->
+	<node name="exploration_stage" pkg="act_pln" type="exploration_stage" output="screen"/>
+    
+</launch>

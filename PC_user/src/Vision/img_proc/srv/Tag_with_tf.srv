@@ -1,0 +1,6 @@
+bool is_find_tag_enabled
+---
+bool success
+string[] mps_name
+geometry_msgs/PointStamped[] point_stamped
+std_msgs/Int16[] cam_region

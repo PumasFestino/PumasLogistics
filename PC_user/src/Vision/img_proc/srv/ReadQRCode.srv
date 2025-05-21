@@ -1,0 +1,4 @@
+bool enabled
+---
+string qr_data
+bool success

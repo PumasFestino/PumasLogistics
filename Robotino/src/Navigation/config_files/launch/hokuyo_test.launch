@@ -1,0 +1,12 @@
+<launch>  
+	<!--param name="/laser" value="/laser_link"/-->
+ 	<node name="urg_node" pkg="urg_node" type="urg_node" output="screen">
+		<!--param name="hostname" value="$(arg hostname)" /-->
+		<!--param name="serial_port" type="string" value="/dev/hokuyo-UHG-08LX" /-->
+		<param name="serial_port" type="string" value="/dev/ttyACM0" />
+		<!--param name="laserRangeFinderNumber" value="0" /-->
+		<param name="frame_id" value="laser_link"/>
+
+        </node>
+</launch>  
+  

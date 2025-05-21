@@ -1,0 +1,5 @@
+# MoveTilt.srv
+float32 angle         # Ángulo deseado, −31 … +31 grados
+float32 time_out   # Duración en segundos para enviar el comando repetidamente
+---
+bool success       # true si se completó sin errores

@@ -1,0 +1,10 @@
+<launch>
+
+	<include file="$(find freenect_launch)/launch/freenect.launch"> </include>	
+	<include file="$(find pocketsphinx)/launch/pocketsphinx.launch"> </include>	
+	<include file="$(find config_files)/launch/navigation.launch"> </include>	
+
+	<node name="speaker" pkg="robotino_talk" type="speaker.py"/>
+	<node name="known_location_parser" pkg="known_locations_parser" type="known_location_server.py"/>
+	<node name="recog_face_server" pkg="face_recog" type="recog_face_server.py" />
+</launch>

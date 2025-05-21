@@ -1,0 +1,13 @@
+scan_filter_chain:
+- name: angular_filter
+  type: laser_filters/LaserScanAngularFilter
+  params:
+    angles_to_remove:
+    - lower_angle: -1.5
+      upper_angle: -0.5
+    - lower_angle: 0.5
+      upper_angle: 1.5
+- name: nan
+  type: laser_filters/TUGLaserScanNANFilter
+- name: inf
+  type: laser_filters/TUGLaserScanINFFilter

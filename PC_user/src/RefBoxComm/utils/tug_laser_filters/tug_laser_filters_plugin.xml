@@ -1,0 +1,23 @@
+<library path="lib/libtug_laser_filters">
+  <class name="laser_filters/TUGLaserScanAngularFilter"
+         type="laser_filters::LaserScanAngularFilter" 
+         base_class_type="filters::FilterBase<sensor_msgs::LaserScan>">
+  <description>
+    This is a filter that removes points in a laser scan inside of definded angular ranges.
+  </description>
+  </class>
+  <class name="laser_filters/TUGLaserScanNANFilter"
+         type="laser_filters::LaserScanNANFilter"
+         base_class_type="filters::FilterBase<sensor_msgs::LaserScan>">
+    <description>
+      This is a filter that removes NAN in a laser scan and replace them with range_max + 1.
+    </description>
+  </class>
+  <class name="laser_filters/TUGLaserScanINFFilter"
+         type="laser_filters::LaserScanINFFilter"
+         base_class_type="filters::FilterBase<sensor_msgs::LaserScan>">
+    <description>
+      This is a filter that removes INF in a laser scan and replace them with range_max + 1.
+    </description>
+  </class>
+</library>

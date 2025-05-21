@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+<robot name="robotino">
+<!-- ***************************** Main Body ***************************** -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0.035" rpy="0 0 1.5707"/>
+      <geometry>
+        <mesh filename="package://robotino_description/model/Robotino3_SplitMain.dae" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.035" rpy="0 0 1.5707"/>
+      <geometry>
+        <mesh filename="package://robotino_description/model/Robotino3_SplitMain.dae" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+  </link>
+<!-- ***************************** Wheel 0 - Mesh ***************************** --> 
+  <link name="wheel0_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robotino_description/model/Robotino3_SplitWheel.dae" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://robotino_description/model/Robotino3_SplitWheel.dae" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+  </link>
+<!-- ========== Wheel 0 - Joint ========== --> 
+  <joint name="wheel0_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="wheel0_link"/>
+    <origin xyz="-0.0001 0.1825 0.059154" rpy="0 0 0"/>
+    <axis xyz="0 1 0" rpy="0 0 0"/>	
+  </joint>
+<!-- ***************************** Wheel 1 - Mesh ***************************** --> 
+  <link name="wheel1_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robotino_description/model/Robotino3_SplitWheel.dae" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://robotino_description/model/Robotino3_SplitWheel.dae" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+  </link>
+<!-- ========== Wheel 1 - Joint ========== --> 
+  <joint name="wheel1_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="wheel1_link"/>
+    <origin xyz="-0.157067 -0.090625 0.059154" rpy="0 0 2.094395102393195"/>
+    <axis xyz="0 1 0" rpy="0 0 0"/>	
+  </joint>
+<!-- ***************************** Wheel 2 - Mesh ***************************** -->  
+  <link name="wheel2_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robotino_description/model/Robotino3_SplitWheel.dae" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://robotino_description/model/Robotino3_SplitWheel.dae" scale="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+  </link>
+<!-- ========== Wheel 2 - Joint ========== --> 
+  <joint name="wheel2_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="wheel2_link"/>
+    <origin xyz="0.156867 -0.090625 0.059154" rpy="0 0 -2.094395102393195"/>
+    <axis xyz="0 1 0" rpy="0 0 0"/>	
+  </joint>  
+<!-- ***************************** Platform ***************************** -->  
+<!-- Un/Comment from here to END to add/remove the platform -->
+  <link name="platform_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://robotino_description/model/Robotino3_Platform.dae" scale="0.009 0.009 0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://robotino_description/model/Robotino3_Platform.dae" scale="0.009 0.009 0.009"/>
+      </geometry>
+    </collision>
+  </link>
+<!-- ========== Platform - Joint ========== --> 
+  <joint name="platform_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="platform_link"/>
+    <origin xyz="0 0 0.06" rpy="0 0 0"/>
+    <axis xyz="0 0 0" rpy="0 0 0"/>	
+  </joint>
+<!-- ***************************** END ***************************** -->  
+
+<!--Hokuyo :P -->
+  <link name="laser_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://robotino_description/meshes/sensors/hokuyo.dae" scale="0.01 0.01 0.01"/>
+      </geometry>
+      <origin xyz="0 0 -0.055" rpy="0 0 1.57"/>
+    </visual>
+  </link>
+
+  <joint name="base_to_hokuyo" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser_link"/>
+    <origin rpy="0 0 0" xyz="0.07 0.0 0.28"/>
+  </joint>
+
+<!--Upper Platform -->
+  <link name="upper_platform_link">
+    <!--visual>
+      <geometry>
+        <cylinder length="0.46" radius="0.045"/>
+      </geometry>
+      <material name="gray">
+      	<color rgba="0.3 0.3 0.3 1"/>
+      </material>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </visual-->
+  </link>
+
+  <joint name="upper_platform_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="upper_platform_link"/>
+    <origin rpy="0 0 0" xyz="0 0 0.76"/>
+  </joint>
+
+<!--Arm+Kinect Base -->
+  <!--link name="arm_kinect_platform_link">
+    <visual>
+      <geometry>
+        <box size="0.28 0.185 0.02"/>
+      </geometry>
+      <material name="gray">
+      	<color rgba="0.3 0.3 0.3 1"/>
+      </material>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </visual>
+  </link-->
+
+  <!--joint name="arm_kinect_platform_joint" type="fixed">
+    <parent link="upper_platform_link"/>
+    <child link="arm_kinect_platform_link"/>
+    <origin rpy="0 0 0" xyz="0.045 0 0.24"/>
+  </joint-->
+
+<!--Kinect Base -->
+  <!--link name="kinect_base_link">
+    <visual>
+      <geometry>
+        <box size="0.075 0.06 0.25"/>
+      </geometry>
+      <material name="gray">
+      	<color rgba="0.3 0.3 0.3 1"/>
+      </material>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </visual>
+  </link-->
+
+  <!--joint name="kinect_base_joint" type="fixed">
+    <parent link="upper_platform_link"/>
+    <child link="kinect_base_link"/>
+    <origin rpy="0 0 0" xyz="-0.1 0 0.13"/>
+  </joint-->
+
+<!-- Kinect o stereo camera-->
+
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://robotino_description/meshes/sensors/kinect.dae" scale="1 1 1"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 1.57"/>
+    </visual>
+  </link>
+
+ <joint name="base_to_kinect" type="fixed">
+    <parent link="upper_platform_link"/>
+    <child link="camera_link"/>
+    <origin rpy="0 0.35 0" xyz=" 0.17 0 0.025"/>
+  </joint>
+
+<!-- iPhone>
+
+  <link name="iphone_link">
+    <visual>
+      <geometry>
+        <box size="0.16 0.08 0.01"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </visual>
+  </link>
+
+ <joint name="base_to_iphone" type="fixed">
+    <parent link="base_link"/>
+    <child link="iphone_link"/>
+    <origin rpy="0 0 0" xyz="-0.06 0.0 1.25"/>
+  </joint-->
+
+</robot>
+

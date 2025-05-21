@@ -1,0 +1,3 @@
+# InitTilt.srv
+---
+bool success       # true si se completó sin errores

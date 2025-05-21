@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="CONTROLLER_NAME_PS3" value="ps3" />
+    <arg name="CONTROLLER_NAME_XBOX360" value="xbox360" />
+    <arg name="CONTROLLER_NAME_LOGITECH_RUMBLE_PAD_2" value="logitech_rumble_pad_2" />
+    <arg name="CONTROLLER_NAME_DEFAULT" value="default" />
+    <arg name="CONTROLLER_DEVICE" default="/dev/input/js0" />
+
+    <node pkg="tug_joy" type="tug_joy.py" name="tug_joy_node" output="screen">
+        <param name="joy_topic_name" type="string" value="/joy" />
+        <param name="joy_manager_frequency" type="int" value="20" />
+        <param name="joy_controller_name" type="string" value="$(arg CONTROLLER_NAME_DEFAULT)" />
+    </node>
+	
+    <node pkg="joy" type="joy_node" name="joy_node" >
+        <param name="dev" type="string" value="$(arg CONTROLLER_DEVICE)" />
+    </node>
+</launch>

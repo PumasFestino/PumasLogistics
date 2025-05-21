@@ -1,0 +1,23 @@
+<launch>
+  
+  <node pkg="tf" type="static_transform_publisher" name="LR_BC" args="10.0 -2.5 0 0 0 0 1 map Living_Room 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="DR_BC" args="8.5 -4.0 0 0 0 0 1 map Dinning_Room 100" />
+  
+  <node pkg="tf" type="static_transform_publisher" name="C_BC" args="6.0 -4.0 0 0 0 0 1 map Corridor 100" />
+  
+  <node pkg="tf" type="static_transform_publisher" name="K_BC" args="7.0 -2.0 0 0 0 0 1 map Kitchen 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="E_BC" args="1.6 -4.5 0 0 0 0 1 map Entrance 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="H_BC" args="1.0 -3.0 0 0 0 0 1 map Hallway 100" />
+  
+  <node pkg="tf" type="static_transform_publisher" name="B_BC" args="5.167 -1.350 0 0 0 0 1 map Bedroom 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="DO_BC" args="0.0 -2.29 0 0 0 0 1 map Docs_Office 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="MO_BC" args="0.0 -5.54 0 0 0 0 1 map Mark_Office 100" />
+
+  <node pkg="tf" type="static_transform_publisher" name="MPS_BS_BC" args="5.1 -3.458 0 0 0 0 1 map MPS_BS 100" />
+
+</launch>

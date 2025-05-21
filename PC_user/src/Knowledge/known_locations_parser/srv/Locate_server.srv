@@ -1,0 +1,4 @@
+std_msgs/String location_name
+---
+geometry_msgs/PoseStamped pose_stamped
+std_msgs/Bool  success

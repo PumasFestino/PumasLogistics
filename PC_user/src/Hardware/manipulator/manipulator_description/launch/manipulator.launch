@@ -1,0 +1,13 @@
+<launch>
+    <!-- Cargar el URDF en el parámetro robot_description -->
+    <param name="robot_description" textfile="$(find manipulator_description)/urdf/manipulator.urdf" />
+
+    <!-- Publicar el estado del robot -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+    <!-- Iniciar RViz -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find manipulator_description)/config/robot.rviz" />
+
+    <!-- Ejecutar el programa para mover el joint -->
+    <node name="mover_joint" pkg="manipulator_control" type="perfil_velocidades.py" output="screen" />
+</launch>

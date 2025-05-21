@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="log_path" default="/logfiles"/>
+  <arg name="bag_path" default="/bagfiles"/>
+  <arg name="bag_name_prefix" default="autobag"/>
+  <arg name="bag_duration" default="120"/>
+
+  <!-- Example for topic exclusion -->
+  <!-- <arg name="bag_excludes" default="
+    /topic
+    /topics_which_start_with_this_string(.*)
+    /topic_of_this_namespace/(.*)
+    "/> -->
+
+  <arg name="bag_excludes" default="
+    "/>
+
+  <!-- <node name="auto_bag" pkg="tug_auto_bag" type="auto_bag.sh" args="$(arg log_path) $(arg bag_path) $(arg bag_name_prefix) $(arg bag_duration) '$(arg bag_excludes)'" output="screen" respawn="false"/> -->
+  <node name="auto_bag" pkg="tug_auto_bag" type="auto_bag.sh" args="$(arg log_path) $(arg bag_path) $(arg bag_name_prefix) $(arg bag_duration) '$(arg bag_excludes)'" output="log" respawn="true"/>
+
+</launch>

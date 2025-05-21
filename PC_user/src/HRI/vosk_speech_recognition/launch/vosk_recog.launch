@@ -1,0 +1,15 @@
+<launch>
+    <arg name="language" default="en-us" />
+    <arg name="model_path" default="$(find vosk_speech_recognition)/models/vosk-model-small-$(arg language)-0.15" />
+    <arg name="sample_rate" default="16000" />
+    <arg name="speech_service" default="/hri/speech_recognition" />
+    <arg name="grammar_path" default="$(find vosk_speech_recognition)/grammars/" />
+
+    <node pkg="vosk_speech_recognition" type="speech_recognizer.py" name="vosk_speech_recognizer" output="screen">
+        <param name="language" type="string" value="$(arg language)" />
+        <param name="model_path" type="string" value="$(arg model_path)" />
+        <param name="sample_rate" type="int" value="$(arg sample_rate)" />
+        <param name="speech_service" type="string" value="$(arg speech_service)" />
+        <param name="grammar_path" type="string" value="$(arg grammar_path)" />
+    </node>
+</launch>

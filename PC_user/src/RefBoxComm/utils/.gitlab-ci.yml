@@ -1,0 +1,25 @@
+compile_with_test_sim0:
+  script:
+    - source $HOME/ci/scripts/setup_ws.sh
+    - catkin_make
+    - catkin_make run_tests -j 1
+    - catkin_test_results --verbose
+    - catkin_test_results
+    - bash $HOME/ci/scripts/perform_static_code_checking.sh
+  tags:
+    - sim0
+  except:
+    - ci
+
+compile_with_test_sim3:
+  script:
+    - source $HOME/ci/scripts/setup_ws.sh
+    - catkin_make
+    - catkin_make run_tests -j 1
+    - catkin_test_results --verbose
+    - catkin_test_results
+    - bash $HOME/ci/scripts/perform_static_code_checking.sh
+  tags:
+    - sim3
+  except:
+    - ci

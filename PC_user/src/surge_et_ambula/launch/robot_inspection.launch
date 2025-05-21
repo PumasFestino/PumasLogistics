@@ -1,0 +1,29 @@
+<launch>
+	<!--<include file="$(find config_files)/launch/navigation.launch"> </include>-->
+	<include file="$(find freenect_launch)/launch/freenect.launch"> </include>
+    <include file="$(find yolo_detect)/launch/yolo_detect.launch"> </include>
+    <include file="$(find vosk_speech_recognition)/launch/vosk_recog.launch"> </include>
+    <node name="move_base" pkg="simple_move" type="move_base" output="screen" />
+
+    <node name="move_kinect" pkg="kinect_move" type="move_kinect.py" output="screen" />
+    
+    <!--<node pkg="pose_estimation" type="yolo_pose_2d_node.py" name="pose_2d_node" output="screen" />-->
+    <!--<node pkg="pose_estimation" type="pose_2d_to_3d_node" name="pose_2d_to_3d_node" output="screen" />-->
+    <!--<node pkg="pose_estimation" type="pointing_detector_node" name="pointing_detector_node" output="screen" />-->
+
+
+     <node name="aling_with_line" pkg="simple_move" type="aling_with_line" output="screen" />
+     <node name="aruco_tf_srv" pkg="img_proc" type="aruco_tf_srv" output="screen" />
+     <node name="leg_finder" pkg="leg_finder" type="leg_finder_node" output="screen" />
+     <node name="human_follower" pkg="human_follower" type="human_follower_node" output="screen" />
+
+	<node name="manipulator_control" pkg="manipulator_control" type="perfil_velocidades.py"/>
+	<node name="speaker" pkg="robotino_talk" type="speaker.py"/>
+	<node name="known_location_parser" pkg="known_locations_parser" type='known_location_server.py'/>	  
+    <node name="face_train_server" pkg="face_recog" type="face_train_server.py"/>
+    <node name="recog_face_server" pkg="face_recog" type="recog_face_server.py"/>
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation_JM.rviz"/>
+
+
+     <!--<node name="carry_2" pkg="act_pln" type="carry_2" output="screen" />-->
+</launch>

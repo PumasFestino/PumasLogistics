@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- Macro -->
+  <xacro:macro name="prismatic_manipulator" params="prefix parent_link mesh_package xyz rpy">
+
+    <!-- Material -->
+    <material name="${prefix}grey">
+      <color rgba="0.6 0.6 0.6 1.0"/>
+    </material>
+
+    <!-- Base del manipulador (sin visual, opcionalmente puede tenerlo) -->
+    <link name="${prefix}platform_link"/>
+
+    <!-- Junto la base del manipulador al parent externo -->
+    <joint name="${prefix}base_joint" type="fixed">
+      <parent link="${parent_link}"/>
+      <child link="${prefix}platform_link"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+
+    <!-- Link: AxisX -->
+    <link name="${prefix}AxisX_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://${mesh_package}/meshes/AxisX.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="${prefix}grey"/>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://${mesh_package}/meshes/AxisX.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Link: AxisY -->
+    <link name="${prefix}AxisY_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://${mesh_package}/meshes/AxisY.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="${prefix}grey"/>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://${mesh_package}/meshes/AxisY.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Link: AxisZ -->
+    <link name="${prefix}AxisZ_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://${mesh_package}/meshes/AxisZ.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="${prefix}grey"/>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://${mesh_package}/meshes/AxisZ.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Link: MovingPlate -->
+    <link name="${prefix}MovingPlate_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://${mesh_package}/meshes/MovingPlate.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="${prefix}grey"/>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://${mesh_package}/meshes/MovingPlate.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Joints internos del manipulador -->
+    <joint name="${prefix}AxisX_joint" type="fixed">
+      <parent link="${prefix}platform_link"/>
+      <child link="${prefix}AxisX_link"/>
+      <origin xyz="-0.115 -0.160 0.00" rpy="0 0 0"/>
+    </joint>
+
+    <joint name="${prefix}AxisY_joint" type="prismatic">
+      <parent link="${prefix}AxisX_link"/>
+      <child link="${prefix}AxisY_link"/>
+      <origin xyz="-0.01 0.308 0.0225" rpy="1.5708 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="0" upper="0.234" effort="0.1" velocity="0.1"/>
+    </joint>
+
+    <joint name="${prefix}AxisZ_joint" type="prismatic">
+      <parent link="${prefix}AxisY_link"/>
+      <child link="${prefix}AxisZ_link"/>
+      <origin xyz="0.039 0.08 0.006" rpy="-1.5708 0 0"/>
+      <axis xyz="1 0 0"/>
+      <limit lower="0" upper="0.105" effort="0.1" velocity="0.1"/>
+    </joint>
+
+    <joint name="${prefix}MovingPlate_joint" type="prismatic">
+      <parent link="${prefix}AxisZ_link"/>
+      <child link="${prefix}MovingPlate_link"/>
+      <origin xyz="-0.032 -0.076 0.38" rpy="-1.5708 3.1415 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="0" upper="0.18" effort="0.1" velocity="0.1"/>
+    </joint>
+
+  </xacro:macro>
+</robot>

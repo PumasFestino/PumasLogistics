@@ -1,0 +1,100 @@
+## This README lists all necessary steps to create a new package that it can be
+## used for the plugin manager.
+## more details: http://wiki.ros.org/pluginlib/Tutorials/Writing%20and%20Using%20a%20Simple%20Plugin
+# 1) create new package
+
+catkin_create_pkg <pkg_name> roscpp pluginlib tug_robot_control tug_plugin_manager
+
+# 2) create the cpp and the h file
+#    h-file example
+###############################################################################
+    #ifndef TUG_PLUGINS_KRIKKIT2_H_
+    #define TUG_PLUGINS_KRIKKIT2_H_
+
+    #include <pluginlib/class_list_macros.h>
+    #include <tug_plugin_manager/plugin_base.h>
+
+    // Select necessary plugin base
+    #include <tug_robot_control/tug_controlled_device_driver_base.h>
+    //#include <tug_robot_control/tug_device_driver_base.h>
+    //#include <tug_robot_control/tug_preprocessor_base.h>
+    //#include <tug_robot_control/tug_postprocessor_base.h>
+
+    namespace tug_plugin_krikkit2
+    {
+
+    class Krikkit2: public tug_robot_control::ControlledDeviceDriver // select necessary base class
+    {
+    public:
+      Krikkit2();
+
+      virtual void initialize(tug_robot_control::RobotHardware* robot_hardware, const ros::NodeHandle & nh, std::string name);
+      virtual void write(const ros::Time& time, const ros::Duration& period);
+      virtual void read(const ros::Time& time, const ros::Duration& period);
+
+    private:
+
+    };
+    }
+
+    #endif /* TUG_PLUGINS_KRIKKIT2_H_ */
+###############################################################################
+
+#    cpp-file example
+###############################################################################
+
+    #include <tug_colin/krikkit2.h>
+
+    namespace tug_plugin_krikkit2
+    {
+      Krikkit2::Krikkit2()
+      {
+      }
+
+      void Krikkit2::initialize(tug_robot_control::RobotHardware* robot_hardware, const ros::NodeHandle & nh, std::string name)
+      {
+    //    ROS_INFO("Krikkit2::initialize");
+      }
+
+      void Krikkit2::write(const ros::Time& time, const ros::Duration& period)
+      {
+    //    ROS_INFO("Krikkit2::write()");
+      }
+
+      void Krikkit2::read(const ros::Time& time, const ros::Duration& period)
+      {
+    //    ROS_INFO("Krikkit2::read()");
+      }
+    }
+
+    PLUGINLIB_EXPORT_CLASS(tug_plugin_krikkit2::Krikkit2, tug_plugin_manager::RegularPlugin)
+###############################################################################
+
+# 3) - add the include folder where the include_directories are specified
+#    - Declare the cpp file as library in the CMakeList.txt
+#    - Uncomment the 'target_link_libraries' line to link ros libraries
+
+# 4) Create a new xml file next to CMakeList.txt and package.xml
+#    Add the following lines to the new file
+
+<?xml version="1.0"?>
+<library path="lib/libtug_plugin_krikkit2">
+  <class type="tug_plugin_krikkit2::Krikkit2" 
+         base_class_type="tug_plugin_manager::RegularPlugin">
+    <description>
+      some description
+    </description>
+  </class>
+</library>
+
+# 5) open the package.xml and add the following line to the export tag
+#    change <filename> to the filename which have been created at 4).
+<tug_plugin_manager plugin="${prefix}/<filename>.xml"/>
+
+
+# 6) compile
+#    Test if the new plugin is known by ros and everything works
+rospack plugins --attrib=plugin tug_plugin_manager
+
+
+

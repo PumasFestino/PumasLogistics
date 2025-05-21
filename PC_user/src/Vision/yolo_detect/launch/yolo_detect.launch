@@ -1,0 +1,11 @@
+<launch>
+    <arg name="model_path" default="$(find yolo_detect)/models/best.pt" />
+
+    <node name="yolo_category"
+      pkg="yolo_detect"
+      type="yolo_detect_node.py"
+      output="screen">
+    <param name="model_path" value="$(arg model_path)" />
+</node>
+
+</launch>

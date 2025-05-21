@@ -1,0 +1,7 @@
+image: challenges_blocked.pgm
+resolution: 0.055284
+origin: [-127.000000, -106.000000, 0] # 3rd parameter - yaw
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.196
+
