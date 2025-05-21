@@ -1,3 +1,6 @@
 [submodule "PC_user/src/Hardware/freenect_stack"]
 	path = PC_user/src/Hardware/freenect_stack
 	url = https://github.com/ros-drivers/freenect_stack.git
+[submodule "PC_user/src/Hardware/xarm"]
+	path = PC_user/src/Hardware/xarm
+	url = https://github.com/xArm-Developer/xarm_ros.git
