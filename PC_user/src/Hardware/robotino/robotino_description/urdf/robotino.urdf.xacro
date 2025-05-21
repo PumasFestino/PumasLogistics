@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robotino">
 
-  <xacro:include filename="$(find manipulator_description)/urdf/manipulator.urdf.xacro" />
+  <xacro:include filename="$(find xarm_description)/urdf/xarm6/xarm6.urdf.xacro"/>
 
   <!-- ******************** Properties ******************** -->
   <xacro:property name="mesh_scale" value="0.01 0.01 0.01"/>
@@ -134,12 +134,41 @@
 </joint>
 
 
-  <!-- ***************** Manipulator ****************-->
-  <xacro:prismatic_manipulator 
-    prefix="manipulator_"
-    parent_link="platform_link"
-    mesh_package="manipulator_description"
-    xyz="0.0 0.0 0.0"
-    rpy="0 0 1.570796"
+<!-- ***************** Manipulator ****************-->
+  <xacro:property name="use_xacro_load_yaml" value="false"/>
+
+  <xacro:xarm6_urdf
+    prefix="xarm_"
+  
   />
+
+  <!-- Fixed joint between robotino and arm base -->
+  <joint name="robotino_to_xarm_mount" type="fixed">
+    <parent link="platform_link"/>
+    <child link="xarm_link0"/>
+    <origin xyz="0 0 0.35" rpy="0 0 0"/> <!-- Ajusta la altura según montaje real -->
+  </joint>
+
+<!--<xacro:property name="is_ros2" value="false"/>
+<xacro:property name="use_xacro_load_yaml" value="false"/>
+<xacro:include filename="$(find xarm_description)/urdf/common/common.link.xacro" />
+<xacro:common_link_visual mesh_path="$(find xarm_description)/meshes/xarm6" />
+
+ <xacro:xarm6_robot
+    prefix="xarm_"
+    limited="false"
+    velocity_control="false"
+    add_gripper="false"
+    add_bio_gripper="false"
+    model_num="0"
+    inertial_params_filename=""
+    kinematics_params_filename=""
+  />
+
+  <joint name="platform_to_xarm" type="fixed">
+    <parent link="platform_link"/>
+    <child link="xarm_link_base"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>-->
+  
 </robot>
