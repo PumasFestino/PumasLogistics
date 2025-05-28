@@ -14,10 +14,9 @@
 #include <tf/transform_listener.h>
 
 /* ------------------- Festino Tools ------------------- */
-#include <festino_tools/FestinoNavigation.h>
 #include <festino_tools/FestinoHardware.h>
 #include <festino_tools/FestinoHRI.h>
-
+#include <festino_tools/FestinoNavigation.h>
 
 //Parametro que multiplica al coseno 
 #define param_x 0.9
