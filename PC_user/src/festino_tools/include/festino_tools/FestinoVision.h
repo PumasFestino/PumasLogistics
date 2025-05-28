@@ -53,7 +53,7 @@ public:
     static bool TrainingPerson(std::string person);
 
     //Aruco detector
-    static void enableArucoDet(bool flag);
+    static void enableArucoTF(bool flag);
     
     //QR detector
     static std::string enableQRDetect(bool enabled);

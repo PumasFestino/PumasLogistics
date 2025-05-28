@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>act_pln</name>
+  <name>festino_task</name>
   <version>0.0.0</version>
-  <description>The act_pln package</description>
+  <description>The festino_task package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="robocup@todo.todo">robocup</maintainer>
+  <maintainer email="joshua@todo.todo">joshua</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/act_pln</url> -->
+  <!-- <url type="website">http://wiki.ros.org/festino_task</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -77,6 +77,7 @@
   <exec_depend>robotino_msgs</exec_depend>
   <exec_depend>festino_tools</exec_depend>
   <exec_depend>message_runtime</exec_depend>
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

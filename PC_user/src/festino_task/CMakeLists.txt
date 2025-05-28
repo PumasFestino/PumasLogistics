@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(act_pln)
+project(festino_task)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -214,9 +214,19 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
+## Declare a C++ executable
+add_executable(grasping src/grasping.cpp)
+add_dependencies(grasping ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(grasping  ${catkin_LIBRARIES})
 
-add_executable(test_mvbase src/test_mvbase.cpp)
-add_dependencies(test_mvbase ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_mvbase ${catkin_LIBRARIES})
+add_executable(navigate_to_zone src/navigate_to_zone.cpp)
+add_dependencies(navigate_to_zone ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(navigate_to_zone ${catkin_LIBRARIES})
 
+add_executable(pose_robot_piece src/pose_robot_piece.cpp)
+add_dependencies(pose_robot_piece ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pose_robot_piece ${catkin_LIBRARIES})
 
+add_executable(pose_robot_station src/pose_robot_station.cpp)
+add_dependencies(pose_robot_station ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pose_robot_station ${catkin_LIBRARIES})

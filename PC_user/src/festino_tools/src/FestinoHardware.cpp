@@ -3,9 +3,9 @@
 bool FestinoHardware::is_node_set = false;
 
 ros::Publisher FestinoHardware::pub_digital;
-ros::Publisher FestinoHardware::pub_head_orientation;
-ros::Publisher FestinoHardware::pub_gripper;
-ros::ServiceClient FestinoHardware::arm_client;
+//ros::Publisher FestinoHardware::pub_head_orientation;
+//ros::Publisher FestinoHardware::pub_gripper;
+//ros::ServiceClient FestinoHardware::arm_client;
 ros::ServiceClient FestinoHardware::kinect_client;
 ros::ServiceClient FestinoHardware::kinect_init;
     
@@ -19,30 +19,30 @@ bool FestinoHardware::setNodeHandle(ros::NodeHandle* nh)
         return false;
     std::cout << "FestinoHardware.->Setting ros node..." << std::endl;
     
-    FestinoHardware::pub_head_orientation   = nh -> advertise       <std_msgs::Float64MultiArray>("/hardware/head/goal_pose", 1000);
-    FestinoHardware::pub_gripper            = nh -> advertise       <std_msgs::Float64>("/hardware/left_arm/goal_gripper", 1000);
+    //FestinoHardware::pub_head_orientation   = nh -> advertise       <std_msgs::Float64MultiArray>("/hardware/head/goal_pose", 1000);
+    //FestinoHardware::pub_gripper            = nh -> advertise       <std_msgs::Float64>("/hardware/left_arm/goal_gripper", 1000);
     FestinoHardware::pub_digital            = nh -> advertise       <robotino_msgs::DigitalReadings>("/set_digital_values", 1000);
-    FestinoHardware::arm_client             = nh -> serviceClient   <arms::MoveArm>("move_left_arm");
+    //FestinoHardware::arm_client             = nh -> serviceClient   <arms::MoveArm>("move_left_arm");
     FestinoHardware::kinect_client          = nh -> serviceClient   <kinect_move::MoveTilt> ("/kinect/move_tilt");
     FestinoHardware::kinect_init            = nh -> serviceClient   <kinect_move::InitTilt> ("/kinect/init_tilt");
     return true;
 }
 
-void FestinoHardware::setHeadOrientation(float yaw, float pitch)
+/*void FestinoHardware::setHeadOrientation(float yaw, float pitch)
 {
     std_msgs::Float64MultiArray msg;
     msg.data.resize(2);
     msg.data[0] = yaw;
     msg.data[1] = pitch;
     FestinoHardware::pub_head_orientation.publish(msg);
-}
+}*/
 
-void FestinoHardware::setGripperPose(float gripper)
+/*void FestinoHardware::setGripperPose(float gripper)
 {
     std_msgs::Float64 msg;
     msg.data = gripper;
-    FestinoHardware::pub_gripper.publish(msg);
-}
+    //FestinoHardware::pub_gripper.publish(msg);
+}*/
 
 void FestinoHardware::setColorLed(std::string colorName)
 {
@@ -103,7 +103,7 @@ void FestinoHardware::setColorLed(std::string colorName)
 
 }
 
-void FestinoHardware::setArmPose(float x, float y, float z, float roll, float pitch, float yaw) 
+/*void FestinoHardware::setArmPose(float x, float y, float z, float roll, float pitch, float yaw) 
 {
     arms::MoveArm srv;
     srv.request.x = x;
@@ -142,7 +142,7 @@ void FestinoHardware::setArmPose(std::string pose_name)
     } else {
         ROS_ERROR("Failed to call move_left_arm service");
     }
-}
+}*/
 
 bool FestinoHardware::move_kinect(float theta, double time_out)
 {   

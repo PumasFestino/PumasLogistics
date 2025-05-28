@@ -118,7 +118,7 @@ bool FestinoVision::TrainingPerson(std::string person)
      }
  }
 
-void FestinoVision::enableArucoDet(bool flag)
+void FestinoVision::enableArucoTF(bool flag)
 {
     std::cout<< "FestinoVision.-> Detect Aruco Mark with TF" << std::endl;
     img_proc::Tag_with_tf srv;

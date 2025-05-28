@@ -38,7 +38,7 @@ int main(int argc, char **argv)
     if(!FestinoNavigation::getClose(goal_vec[0], goal_vec[1], goal_vec[2], 120000))
     std::cout << "Cannot move to inspection point" << std::endl;*/
 
-    FestinoVision::enableArucoDet(true);
+    FestinoVision::enableArucoTF(true);
 
     tf2_ros::Buffer tf_buffer;
     tf2_ros::TransformListener tf_listener(tf_buffer);
