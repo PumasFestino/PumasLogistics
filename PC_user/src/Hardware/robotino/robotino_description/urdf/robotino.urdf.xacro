@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
+<!-- ==================================================================== -->
+<!-- ==================== ROBOTINO 4 - FestXarmKeshi ==================== -->
+<!-- ==================== PUMAS - Biorobotics Lab    ==================== -->
+<!-- ==================================================================== -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robotino">
-
+  
   <!-- ==================== Includes ==================== -->
   <xacro:include filename="$(find xarm_description)/urdf/xarm6/xarm6.urdf.xacro"/>
   <xacro:include filename="$(find xarm_description)/urdf/xarm_device_macro.xacro" />
@@ -9,7 +13,7 @@
   <xacro:property name="mesh_scale" value="0.01 0.01 0.01"/>
   <xacro:property name="wheel_mesh" value="package://robotino_description/model/Robotino3_SplitWheel.dae"/>
   <xacro:property name="body_mesh" value="package://robotino_description/model/Robotino3_SplitMain_NoCamera.dae"/>
-  <xacro:property name="tower_mesh" value="package://robotino_description/model/Robotino3_Platform.dae"/>
+  <xacro:property name="tower_mesh" value="package://robotino_description/model/Robotino3_Platform-xarm.dae"/>
   <xacro:property name="hokuyo_mesh" value="package://robotino_description/meshes/sensors/hokuyo.dae"/>
   <xacro:property name="kinect_mesh" value="package://robotino_description/meshes/sensors/kinect.dae"/>
 
@@ -77,7 +81,7 @@
   <joint name="platform_joint" type="fixed">
     <parent link="base_link"/>
     <child link="platform_link"/>
-    <origin xyz="0 0 0.76" rpy="0 0 0"/>
+    <origin xyz="0 0 0.57" rpy="0 0 0"/>
   </joint>
 
   <!-- ==================== Hokuyo Sensor ==================== -->
@@ -102,32 +106,6 @@
     <origin xyz="0.07 0.0 0.28" rpy="0 0 0"/>
   </joint>
 
-  <!-- ==================== Kinect Sensor ==================== -->
-  <link name="camera_base_link"/>
-  
-  <link name="camera_link">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 1.57"/>
-      <geometry>
-        <mesh filename="${kinect_mesh}" scale="1 1 1"/>
-      </geometry>
-    </visual>
-  </link>
-
-  <joint name="platform_to_camera_base" type="fixed">
-    <parent link="platform_link"/>
-    <child link="camera_base_link"/> 
-    <origin xyz="0.17 0 0.025" rpy="0 0 0"/>
-  </joint>
-
-  <joint name="camera_tilt_joint" type="revolute">
-    <parent link="camera_base_link"/>
-    <child link="camera_link"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <axis xyz="0 1 0"/> 
-    <limit lower="${-0.541}" upper="${0.541}" effort="1.0" velocity="1.0"/>
-  </joint>
-
   <!-- ==================== Manipulator (XArm) ==================== -->
   <!-- XArm arguments -->
   <xacro:arg name="prefix" default="arm_"/>
@@ -146,8 +124,8 @@
   <xacro:arg name="report_type" default="normal"/>
   <xacro:arg name="ros2_control_plugin" default="uf_robot_hardware/UFRobotSystemHardware"/>
   <xacro:arg name="ros2_control_params" default=""/>
-  <xacro:arg name="add_realsense_d435i" default="true"/>
-  <xacro:arg name="add_d435i_links" default="true"/>
+  <xacro:arg name="add_realsense_d435i" default="false"/>
+  <xacro:arg name="add_d435i_links" default="false"/>
   <xacro:arg name="use_gazebo_camera" default="false"/>
   <xacro:arg name="add_other_geometry" default="false"/>
   <xacro:arg name="geometry_type" default="box"/>
@@ -164,7 +142,7 @@
   <xacro:arg name="baud_checkset" default="true"/>
   <xacro:arg name="default_gripper_baud" default="2000000"/>
   <xacro:arg name="attach_to" default="platform_link"/>
-  <xacro:arg name="attach_xyz" default="-0.06 0 0.0"/>
+  <xacro:arg name="attach_xyz" default="0.0 0.0 0.0"/>
   <xacro:arg name="attach_rpy" default="0 0 0"/>
   <xacro:arg name="mesh_suffix" default="stl"/>
   <xacro:arg name="kinematics_suffix" default=""/>
@@ -211,5 +189,30 @@
     mesh_suffix="$(arg mesh_suffix)" 
     kinematics_suffix="$(arg kinematics_suffix)"
   />
+
+  <!-- ==================== Kinect Sensor ==================== -->
+  
+  <link name="camera_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 1.57"/>
+      <geometry>
+        <mesh filename="${kinect_mesh}" scale="1 1 1"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 1.57"/>
+      <geometry>
+        <mesh filename="${kinect_mesh}" scale="1 1 1"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="platform_to_camera_link" type="fixed">
+    <parent link="arm_link6"/>
+    <child link="camera_link"/> 
+    
+    <origin xyz="0.08 0 -0.05" rpy="3.1415 -1.5707 0"/>
+  </joint>
+
     
 </robot>
