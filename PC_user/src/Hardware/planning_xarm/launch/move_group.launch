@@ -27,7 +27,7 @@
   </include>
 
   <!-- Trajectory Execution Functionality -->
-  <include ns="move_group" file="$(find planning_xarm)/launch/trajectory_execution.launch.xml" if="$(arg allow_trajectory_execution)">
+  <include ns="move_group" file="$(find xarm6_moveit_config)/launch/trajectory_execution.launch.xml" if="$(arg allow_trajectory_execution)">
     <arg name="moveit_manage_controllers" value="true" />
     <arg name="moveit_controller_manager" value="fake" if="$(arg fake_execution)"/>
     <arg name="moveit_controller_manager" value="gazebo" if="$(eval not arg('fake_execution') and arg('sim_gazebo'))"/>
@@ -36,7 +36,7 @@
   </include>
 
   <!-- Sensors Functionality -->
-  <include ns="move_group" file="$(find planning_xarm)/launch/sensor_manager.launch.xml" if="$(arg allow_trajectory_execution)">
+  <include ns="move_group" file="$(find xarm6_moveit_config)/launch/sensor_manager.launch.xml" if="$(arg allow_trajectory_execution)">
     <arg name="moveit_sensor_manager" value="xarm6" />
   </include>
 
