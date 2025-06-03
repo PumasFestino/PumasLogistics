@@ -118,15 +118,17 @@ bool FestinoVision::TrainingPerson(std::string person)
      }
  }
 
-void FestinoVision::enableArucoTF(bool flag)
+std::string FestinoVision::getArucoTF(bool flag)
 {
     std::cout<< "FestinoVision.-> Detect Aruco Mark with TF" << std::endl;
+    std::string mps_name = "";
     img_proc::Tag_with_tf srv;
     srv.request.is_find_tag_enabled = flag;
     if(cltArucoTf.call(srv))
     {
         std::cout << "Success: " << srv.response.success << std:: endl;
     }
+    return srv.response.mps_name;
 }
 
 std::string FestinoVision::enableQRDetect(bool enabled)

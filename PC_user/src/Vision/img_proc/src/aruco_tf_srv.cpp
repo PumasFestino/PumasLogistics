@@ -76,7 +76,7 @@ class ArucoDistanceTF
                 {
                     process();
                     res.success = success;
-                    res.mps_name = mps_names;
+                    res.mps_name = mps_names.empty() ? "" : mps_names[0];
                 }
                 return true;
             }
@@ -87,67 +87,76 @@ class ArucoDistanceTF
                 if (latest_image_.empty() || !latest_pointcloud_)
                 {
                     ROS_INFO("Waiting image data and point cloud...");
-                    
                     return;
                 }
-
+            
                 cv::Mat gray;
                 cv::cvtColor(latest_image_, gray, cv::COLOR_BGR2GRAY);
-
+            
                 std::vector<std::vector<cv::Point2f>> corners;
                 std::vector<int> ids;
                 cv::aruco::detectMarkers(gray, aruco_dict_, corners, ids, aruco_params_);
-
-                std::vector<geometry_msgs::Point> plane_x;
-
+            
+                geometry_msgs::Point closest_centroid;
+                tf2::Quaternion closest_q;
+                double min_distance = std::numeric_limits<double>::max();
+                int closest_id = -1;
+            
                 if (!ids.empty())
                 {
-                    mps_names.clear();
+                    // ----- Iterar por cada marcador detectado ----- //
                     for (size_t i = 0; i < ids.size(); ++i)
                     {
-                        plane_x.clear();
-
+                        std::vector<geometry_msgs::Point> plane_x;
                         for (const auto& corner : corners[i])
-                        {
                             plane_x.push_back(getPointFromCloud(corner.x, corner.y));
-                        }
-
-                        if (plane_x.size() == 4) 
+                    
+                        if (plane_x.size() == 4)
                         {
-                            
+                            // ----- Calcular el centroide del marcador ----- //
                             geometry_msgs::Point centroid_3d;
                             centroid_3d.x = (plane_x[0].x + plane_x[1].x + plane_x[2].x + plane_x[3].x) / 4.0;
                             centroid_3d.y = (plane_x[0].y + plane_x[1].y + plane_x[2].y + plane_x[3].y) / 4.0;
                             centroid_3d.z = (plane_x[0].z + plane_x[1].z + plane_x[2].z + plane_x[3].z) / 4.0;
-
                         
+                            // ----- Calcular la orientación del plano ----- //
                             Eigen::Vector3d v1(plane_x[1].x - plane_x[0].x, plane_x[1].y - plane_x[0].y, plane_x[1].z - plane_x[0].z);
                             Eigen::Vector3d v2(plane_x[3].x - plane_x[0].x, plane_x[3].y - plane_x[0].y, plane_x[3].z - plane_x[0].z);
-
-                            
                             Eigen::Vector3d normal = v1.cross(v2);
                             normal.normalize();
-
-                            
                             double yaw = atan2(normal.y(), normal.x());
-
-                            
+                        
                             tf2::Quaternion q;
                             q.setRPY(0, 0, yaw);
-
-                            std::cout << "Coord 3D from marker " << ids[i] << ": x=" << centroid_3d.x 
-                                    << ", y=" << centroid_3d.y << ", z=" << centroid_3d.z 
-                                    << ", yaw=" << yaw << std::endl;
-
-                            mps_names.push_back(std::to_string(ids[i]));
-                            publishTF(centroid_3d.x, centroid_3d.y, centroid_3d.z, q, ids[i]);
+                        
+                            // ----- Calcular la distancia al marcador ----- //
+                            double distance = std::sqrt(
+                                std::pow(centroid_3d.x, 2) +
+                                std::pow(centroid_3d.y, 2) +
+                                std::pow(centroid_3d.z, 2));
+                            
+                            if (distance < min_distance)
+                            {
+                                min_distance = distance;
+                                closest_centroid = centroid_3d;
+                                closest_q = q;
+                                closest_id = ids[i];
+                            }
                         }
                         else
                         {
                             ROS_WARN("Not enough corner points detected.");
-                            success = false;
                         }
-                    }   
+                    }
+                
+                    // ----- Si se encontró el más cercano, publicarlo ----- //
+                    if (closest_id != -1)
+                    {
+                        publishTF(closest_centroid.x, closest_centroid.y, closest_centroid.z, closest_q, closest_id);
+                        mps_names.clear();
+                        mps_names.push_back(std::to_string(closest_id));
+                        success = true;
+                    }
                 }
                 else
                 {
