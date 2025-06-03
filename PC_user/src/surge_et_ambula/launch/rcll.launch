@@ -1,9 +1,19 @@
 <launch>
+
+    <arg name="robot_ip" default="172.27.1.212" />
+    <arg name="show_rviz" default="false" />
+  
+
     <include file="$(find freenect_launch)/launch/freenect.launch" />
 
     <node name="move_base" pkg="simple_move" type="move_base" output="screen" />
     <node name="aling_with_line" pkg="simple_move" type="aling_with_line" output="screen" />
     <node name="aruco_tf_srv" pkg="img_proc" type="aruco_tf_srv" output="screen" />
+
+    <include file="$(find planning_xarm)/launch/realMove_exec.launch">
+        <arg name="robot_ip" value="$(arg robot_ip)" />
+        <arg name="show_rviz" value="false" />
+    </include>
 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation_JM.rviz"/>
 </launch>

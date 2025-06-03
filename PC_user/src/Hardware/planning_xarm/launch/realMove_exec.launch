@@ -1,6 +1,6 @@
 <launch>
-  <!-- En teoria no va porque lo hace Robotino /////-->
-  <arg name="robot_ip" default ="172.27.1.212"/>
+
+  <arg name="robot_ip" />
   <arg name="report_type" default="normal" />	
   <!-- load the default move_group planner (not xarm_simple_planner) -->
   <arg name="show_rviz" default="true" />
@@ -38,8 +38,7 @@
   <arg name="robot_sn" default="" />
 
   <!-- common: bring up node to enable real xArm control -->
-  <!-- En teoria eso no va porque eso lo hace Robotino-->
-  <!--<include file="$(find xarm_bringup)/launch/xarm6_server.launch">
+  <include file="$(find xarm_bringup)/launch/xarm6_server.launch">
     <arg name="robot_ip" value="$(arg robot_ip)" />
     <arg name="report_type" value="$(arg report_type)" />
     <arg name="use_moveit" value="true" />
@@ -49,10 +48,9 @@
     <arg name="baud_checkset" value="$(arg baud_checkset)" />
     <arg name="default_gripper_baud" value="$(arg default_gripper_baud)" />
     <arg name="add_gripper" value="$(arg add_gripper)"/>
-  </include>-->
+  </include>
 
   <!-- load the joint trajectory controller specified in yaml -->
-  <!-- REVISAR EL LUNES-->
   <rosparam file="$(find xarm_controller)/config/xarm6/xarm6_controllers.yaml" command="load" ns="$(arg xarm_hw_ns)"/>
   <arg name="robot_controller_name" value="$(eval 'xarm6_velo_traj_controller' if arg('velocity_control') else 'xarm6_traj_controller')" />
   <node
@@ -68,7 +66,6 @@
   <remap if="$(arg add_gripper)" from="xarm_gripper/gripper_action" to="$(arg xarm_hw_ns)/xarm_gripper/gripper_action"/>
 
   <!-- common part -->
-  <!-- REVISAR EL LUNES /////// S e planea agregar move_group en lugar de rviz_common -->
   <remap from="/tf" to="$(arg ext_ns)/tf" />
   <remap from="/tf_static" to="$(arg ext_ns)/tf_static" />
   <remap from="/move_group/monitored_planning_scene" to="$(arg ext_ns)/move_group/monitored_planning_scene" />
