@@ -77,7 +77,9 @@ class PoseRobotStationAction
                         case SM_FIND_TAG:
                             current_state = "SM_FIND_TAG";
                             name_mps_ = FestinoVision::getArucoTF(true);
-                            state_ = (name_mps_ != "") ? (aling_ ? SM_ALING_WITH_MPS : SM_PUT_MPS_ON_MAP) : SM_FIND_TAG;
+                            //state_ = (name_mps_ != "") ? (aling_ ? SM_ALING_WITH_MPS : SM_PUT_MPS_ON_MAP) : SM_FIND_TAG;
+                            std::cout << "Aruco Marker: " << name_mps_ << std::endl;
+                            state_ = SM_FINISH;
                             break;
 
                         case SM_ALING_WITH_MPS:
@@ -136,8 +138,9 @@ class PoseRobotStationAction
                 }
 
                 result_.success = success_;
-                feedback_.state = "FINISHED";
                 as_.setSucceeded(result_);
+                success_ = false;
+                state_ = SM_INIT;
             }
     };  
 

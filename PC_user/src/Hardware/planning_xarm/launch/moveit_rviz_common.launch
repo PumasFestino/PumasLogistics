@@ -86,7 +86,7 @@
   </node>
 
   <!-- Given the published joint states, publish tf for the robot links -->
-  <node if="$(arg pub_tf)" name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" />
+  <!--node if="$(arg pub_tf)" name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" /-->
 
   <!-- Run the main MoveIt executable without trajectory execution (we do not have controllers configured by default) -->
   <include if="$(arg load_move_group)" file="$(find xarm6_moveit_config)/launch/move_group.launch">

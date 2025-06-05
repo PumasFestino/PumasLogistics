@@ -12,12 +12,12 @@
   </group>
 
   <!-- Grupo de la herramienta -->
-  <group name="tool_end">
+  <!--<group name="tool_end">
     <joint name="joint_eef"/>
-  </group>
+  </group>-->
 
   <!-- End effector -->
-  <end_effector group="tool_end" name="end_effector" parent_link="link6"/>
+  <!--<end_effector group="tool_end" name="end_effector" parent_link="link6"/>-->
 
   <!-- Estados del brazo -->
   <group_state group="xarm6" name="home">
