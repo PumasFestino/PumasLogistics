@@ -214,3 +214,9 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+find_package(Protobuf REQUIRED)
+protobuf_generate_python(PROTO_PYTHON_FILES 
+    PROTO_FILES 
+    ${PROTO_SRCS}
+)
