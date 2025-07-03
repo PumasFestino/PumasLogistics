@@ -5,6 +5,8 @@
 #include <vector>
 #include <cmath>
 #include <random>
+#include <limits>
+#include <algorithm>
 
 class LineAligner
 {
@@ -20,11 +22,14 @@ private:
     bool is_align_enabled_;
     bool use_ransac_;
 
+    enum State { IDLE, ALIGNING, CENTERING };
+    State state_;
+
     const int MAX_ITER = 100;
     const double DIST_THRESHOLD = 0.05;
 
 public:
-    LineAligner()
+    LineAligner() : state_(IDLE)
     {
         scan_sub_ = nh_.subscribe("/scan", 1, &LineAligner::scanCallback, this);
         cmd_pub_ = nh_.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
@@ -34,13 +39,13 @@ public:
         use_ransac_ = true;
         timer_ = nh_.createTimer(ros::Duration(0.05), &LineAligner::process, this);
 
-        std::cout << "Line Aligner with Hokuyo --- Soft by Joshua M" << std::endl;
+        ROS_INFO("Line Aligner with Hokuyo --- Soft by Joshua M");
     }
 
     void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     {
         points_.clear();
-        for (int i = 0; i < msg->ranges.size(); ++i)
+        for (size_t i = 0; i < msg->ranges.size(); ++i)
         {
             float range = msg->ranges[i];
             if (range < msg->range_max && range > msg->range_min)
@@ -53,26 +58,76 @@ public:
         }
     }
 
+    double computeLineCenterOffset()
+    {
+        // 1. Filtrar puntos en frente del robot
+        std::vector<double> y_values;
+        for (const auto& p : points_) {
+            // Considerar solo puntos en un rango frontal (x > 0) y a distancia razonable
+            if (p.first > 0.1 && p.first < 2.0) {
+                y_values.push_back(p.second);
+            }
+        }
+        
+        if (y_values.size() < 10) {
+            ROS_WARN_THROTTLE(1.0, "Not enough points for center calculation");
+            return 0.0;
+        }
+        
+        // 2. Ordenar para encontrar los extremos de la línea
+        std::sort(y_values.begin(), y_values.end());
+        
+        // 3. Calcular centro usando percentiles robustos (ignorar outliers)
+        const double lower_percentile = 0.15;
+        const double upper_percentile = 0.85;
+        
+        int lower_idx = static_cast<int>(y_values.size() * lower_percentile);
+        int upper_idx = static_cast<int>(y_values.size() * upper_percentile);
+        
+        double left_edge = y_values[lower_idx];   // Lado "izquierdo" de la línea
+        double right_edge = y_values[upper_idx];  // Lado "derecho" de la línea
+        
+        // 4. Calcular centro geométrico de la línea
+        double line_center = (left_edge + right_edge) / 2.0;
+        
+        ROS_DEBUG_THROTTLE(0.5, "Line edges: left=%.3f, right=%.3f, center=%.3f", 
+                          left_edge, right_edge, line_center);
+        
+        return line_center;
+    }
+
     void process(const ros::TimerEvent&)
     {
         if (!is_align_enabled_ || points_.size() < 2) return;
 
-        double angle_error = 0.0;
-
-        if (use_ransac_)
-        {
-            angle_error = computeAngleErrorRANSAC(points_);
+        switch(state_) {
+            case ALIGNING: {
+                double angle_error = use_ransac_ ? computeAngleErrorRANSAC(points_) 
+                                                : computeAngleErrorCenterOfMass(points_);
+                cmd.angular.z = -0.5 * angle_error;
+                cmd.linear.x = 0.0;
+                cmd.linear.y = 0.0;
+                cmd_pub_.publish(cmd);
+                break;
+            }
+            case CENTERING: {
+                double center_error = computeLineCenterOffset();
+                
+                double kp = -0.5;  // Ganancia para movimiento lateral
+                cmd.linear.y = -kp * center_error;
+                cmd.angular.z = 0.0;
+                cmd.linear.x = 0.0;
+                cmd_pub_.publish(cmd);
+                
+                ROS_INFO_STREAM_THROTTLE(0.5, "Center error: " << center_error);
+                break;
+            }
+            case IDLE:
+                break;
         }
-        else
-        {
-            angle_error = computeAngleErrorCenterOfMass(points_);
-        }
-
-        cmd.angular.z = -0.5 * angle_error; 
-        cmd_pub_.publish(cmd);
     }
 
-    double computeAngleErrorRANSAC(const std::vector<std::pair<double, double>>& points)
+double computeAngleErrorRANSAC(const std::vector<std::pair<double, double>>& points)
     {
         int best_inliers = 0;
         double best_angle = 0.0;
@@ -142,51 +197,69 @@ public:
 
         return mean_angle;
     }
-
     bool toggleAlignment(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res)
     {
         if (req.data)
         {
+            timer_.stop();
             is_align_enabled_ = true;
-            std::cout<<"Line Aligner with Hokuyo --- Start align with LaserScan."<<std::endl;
+            ROS_INFO("Line Aligner with Hokuyo --- Start align with LaserScan.");
 
+            // Fase de alineación angular
+            state_ = ALIGNING;
             while (ros::ok() && !isAligned())
             {
-                process(ros::TimerEvent()); 
-                ros::spinOnce();            
+                process(ros::TimerEvent());
+                ros::spinOnce();
                 ros::Duration(0.05).sleep();
             }
 
-            cmd.linear.x = 0.0;
-            cmd.linear.y = 0.0;
-            cmd.angular.z = 0.0;
+            // Detener rotación
+            cmd = geometry_msgs::Twist();
             cmd_pub_.publish(cmd);
 
+            // Fase de centrado en la línea
+            state_ = CENTERING;
+            while (ros::ok() && !isCentered())
+            {
+                process(ros::TimerEvent());
+                ros::spinOnce();
+                ros::Duration(0.05).sleep();
+            }
+
+            // Detener completamente
+            cmd = geometry_msgs::Twist();
+            cmd_pub_.publish(cmd);
+            
             is_align_enabled_ = false;
+            state_ = IDLE;
+            timer_.start();
+
             res.success = true;
             res.message = "Line Aligner with Hokuyo --- Align done.";
         }
         else {
             is_align_enabled_ = false;
+            state_ = IDLE;
             res.success = true;
             res.message = "Line Aligner with Hokuyo --- Align disabled";
         }
-
         return true;
     }
 
     bool isAligned()
     {
-        const double ALIGNED_THRESHOLD = 0.05;
-        
-        double angle_error = 0.0;
-        if (use_ransac_) {
-            angle_error = computeAngleErrorRANSAC(points_);
-        } else {
-            angle_error = computeAngleErrorCenterOfMass(points_);
-        }
-
+        const double ALIGNED_THRESHOLD = 0.04; // ~3°
+        double angle_error = use_ransac_ ? computeAngleErrorRANSAC(points_) 
+                                        : computeAngleErrorCenterOfMass(points_);
         return fabs(angle_error) < ALIGNED_THRESHOLD; 
+    }
+
+    bool isCentered()
+    {
+        const double CENTERED_THRESHOLD = 0.07; // 2 cm
+        double center_error = computeLineCenterOffset();
+        return fabs(center_error) < CENTERED_THRESHOLD;
     }
 };
 
