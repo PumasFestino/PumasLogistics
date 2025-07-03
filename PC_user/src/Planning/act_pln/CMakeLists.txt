@@ -241,7 +241,6 @@ add_executable(stories src/stor.cpp)
 add_dependencies(stories ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(stories ${catkin_LIBRARIES})
 
-
-
-
-
+add_executable(navigation src/navigation_challenge_track.cpp)
+add_dependencies(navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(navigation ${catkin_LIBRARIES})

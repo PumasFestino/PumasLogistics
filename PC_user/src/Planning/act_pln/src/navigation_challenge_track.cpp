@@ -91,7 +91,7 @@ int main(int argc, char** argv){
 
     std::string msg;
 
-    int target_indx == 0;
+    int target_indx = 0;
 
     // Reset zones pose
 	for(int i=0; i<target_zones.size(); i++){
