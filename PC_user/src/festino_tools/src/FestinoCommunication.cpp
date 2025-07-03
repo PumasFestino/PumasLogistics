@@ -22,10 +22,40 @@ bool FestinoCommunication::setNodeHandle(ros::NodeHandle* nh)
 std::string FestinoCommunication::getInstruction()
 {
     robot_to_main_communication::InstructionService srv;
+    srv.request.request = "request_instruction";
+
     if (instruction_client.call(srv)) {
         return srv.response.instruction;
     } else {
         ROS_ERROR("FestinoCommunication.->Failed to call /instruction_msg");
         return "";
+    }
+}
+
+bool FestinoCommunication::reportPose(float x, float y)
+{
+    robot_to_main_communication::InstructionService srv;
+    std::ostringstream oss;
+    oss << "report_pose:" << x << "," << y;
+    srv.request.request = oss.str();
+
+    if (instruction_client.call(srv)) {
+        return srv.response.instruction == "ACK";
+    } else {
+        ROS_ERROR("FestinoCommunication.->Failed to report pose");
+        return false;
+    }
+}
+
+bool FestinoCommunication::reportMachine(const std::string& zone, const std::string& orientation)
+{
+    robot_to_main_communication::InstructionService srv;
+    srv.request.request = "report_machine:" + zone + "," + orientation;
+
+    if (instruction_client.call(srv)) {
+        return srv.response.instruction == "ACK";
+    } else {
+        ROS_ERROR("FestinoCommunication.->Failed to report machine info");
+        return false;
     }
 }

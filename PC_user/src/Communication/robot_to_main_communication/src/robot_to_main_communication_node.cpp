@@ -14,19 +14,27 @@ char buffer[50];
 bool handle_instruction(robot_to_main_communication::InstructionService::Request &req,
                         robot_to_main_communication::InstructionService::Response &res)
 {
-    write(client_fd, "n", 1);
+    std::string command = req.request;
+    if (command.empty())
+        command = "request_instruction";
+
+    // Enviar al servidor TCP
+    write(client_fd, command.c_str(), command.length());
+
+    // Leer respuesta del servidor
     int valread = read(client_fd, buffer, sizeof(buffer));
     if (valread > 0) {
         buffer[valread] = '\0';
         res.instruction = std::string(buffer);
         memset(buffer, 0, sizeof(buffer));
-        ROS_INFO("Instruction sent: %s", res.instruction.c_str());
+        ROS_INFO("Response: %s", res.instruction.c_str());
         return true;
     } else {
         ROS_ERROR("No data received from server");
         return false;
     }
 }
+
 
 int main(int argc, char **argv)
 {
@@ -50,7 +58,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    ros::init(argc, argv, "robot_to_main_comm_node");
+    ros::init(argc, argv, "robot_to_main_communication_node");
     ros::NodeHandle nh;
 
     ros::ServiceServer service = nh.advertiseService("/instruction_msg", handle_instruction);
