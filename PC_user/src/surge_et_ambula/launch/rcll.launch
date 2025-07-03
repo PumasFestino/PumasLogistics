@@ -7,5 +7,7 @@
     
     <include file="$(find robot_to_main_communication)/launch/robot_to_main_communication.launch" />
 
+
+    
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation_JM.rviz"/>
 </launch>
