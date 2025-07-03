@@ -18,9 +18,8 @@
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
 	SM_INIT,
-	SM_WAIT_FOR_ZONES,
-	SM_CALC_EU_DIST,
-	SM_NAV_NEAREST_ZONE,
+	SM_WAIT_FOR_ZONES, // Positions are sent in order based on plan
+	SM_NAV_TO_ZONE,
     SM_FINAL_STATE
 };
 
@@ -64,7 +63,7 @@ void transform_zones()
     	//Obtaining destination point from string 
     	try{
           //listener.lookupTransform(target_zones.at(i), "/map", ros::Time(0), transform);
-    		listener.lookupTransform(target_zones.at(i).data, "/map", ros::Time(0), transform);
+            listener.lookupTransform(target_zones.at(i).data, "/map", ros::Time(0), transform);
         }
         catch (tf::TransformException ex){
           ROS_ERROR("%s",ex.what());
@@ -73,6 +72,7 @@ void transform_zones()
 
         tf_target_zones.at(i).pose.position.x = -transform.getOrigin().x();
     	tf_target_zones.at(i).pose.position.y = -transform.getOrigin().y();
+        // IS ORIENTATION NEEDED ??
     }
 }
 
@@ -83,20 +83,17 @@ int main(int argc, char** argv){
     ros::init(argc, argv, "SM");
     ros::NodeHandle n;
 
-    //Subscribers and Publishers
     ros::Subscriber subRefbox = n.subscribe("/zones_refbox", 1, callback_refbox_zones);
     ros::Subscriber sub_move_goal_status   = n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
-    ros::Publisher pub_speaker = n.advertise<std_msgs::String>("/speak", 1000, latch = true);
     ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
 
     ros::Rate loop(30);
 
-    std_msgs::String voice;
     std::string msg;
 
-    int min_indx;
+    int target_indx == 0;
 
-    //TF related stuff 
+    // Reset zones pose
 	for(int i=0; i<target_zones.size(); i++){
     	tf_target_zones.at(i).header.frame_id = "/map";
 	    tf_target_zones.at(i).pose.position.x = 0.0;
@@ -113,21 +110,17 @@ int main(int argc, char** argv){
 			case SM_INIT:
 	    		//Init case
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
-	            msg = "I am ready for the navigation challenge";
+	            msg = "Ready for the navigation challenge";
 	            std::cout << msg << std::endl;
-	            voice.data = msg;
-	            pub_speaker.publish(voice);
 	            ros::Duration(2, 0).sleep();
 	    		state = SM_WAIT_FOR_ZONES;
 	    		break;
 
 	    	case SM_WAIT_FOR_ZONES:
 	    		//Wating for zone case
-	    		std::cout << "State machine: SM_WAIT_FOR_ZONES" << std::endl;
-	            msg = "Wating for target zones";
+	    		std::cout << "State machine: SM_WAIT_FOR_ZONE" << std::endl;
+	            msg = "Wating for target zone";
 	            std::cout << msg << std::endl;
-	            voice.data = msg;
-	            pub_speaker.publish(voice);
 	            ros::Duration(2, 0).sleep();
 	            sleep(1);
 
@@ -137,26 +130,21 @@ int main(int argc, char** argv){
 	    		}	
 	    		else{
 	    			transform_zones();
-	    			state = SM_CALC_EU_DIST;	
+	    			state = SM_NAV_TO_ZONE;	
 	    		}
 	    		break;
-
+/*************** FURTHER REFERENCE *************************************************
 	    	case SM_CALC_EU_DIST:{
 	    		//Computing euclidean distance case
 	    		std::cout << "State machine: SM_CALC_EU_DIST" << std::endl;
 	            msg = "Computing euclidean distance";
 	            std::cout << msg << std::endl;
-	            voice.data = msg;
-	            pub_speaker.publish(voice);
 	            ros::Duration(2, 0).sleep();
 
 	            //Vector of euclidean distances
 				std::vector<double> euc_dist;
 
-				//Obtaining robot location
-				geometry_msgs::PoseStamped tf_robot_pose;
-				tf::TransformListener listener_rob;
-			    tf::StampedTransform transform_rob;
+				
  
 			    try{
 		          listener_rob.lookupTransform("/base_link", "/map",  
@@ -187,53 +175,51 @@ int main(int argc, char** argv){
 
     			ros::Duration(2, 0).sleep();
                 
-                pub_goal.publish(tf_target_zones.at(min_indx));
 
 	    		state = SM_NAV_NEAREST_ZONE;
 	    		break;
 	        }
-	    	case SM_NAV_NEAREST_ZONE:{
+*************************************************************************/
+	    	case SM_NAV_TO_ZONE:{
             	//Wait for finished navigation
-	            std::cout << "State machine: SM_NAV_NEAREST_ZONE" << std::endl;
-	            msg = "Navigating to destination point";
-	            std::cout << msg << std::endl;
-	            voice.data = msg;
-	            pub_speaker.publish(voice);
+	            std::cout << "State machine: SM_NAV_TO_ZONE" << std::endl;
+	            std::cout << "Navigating to destination point" << std::endl;
 	            ros::Duration(3, 0).sleep();
 
+                //Obtaining robot location
+                geometry_msgs::PoseStamped tf_robot_pose;
+                tf::TransformListener listener_rob;
+                tf::StampedTransform transform_rob;
+
+                pub_goal.publish(tf_target_zones.at(target_indx));
+
 	            if(simple_move_goal_status.status == actionlib_msgs::GoalStatus::SUCCEEDED && simple_move_status_id == -1){
-	                msg = "Goal location reached";
-	                std::cout << msg << std::endl;
-	                voice.data = msg;
-	                pub_speaker.publish(voice);
+	                std::cout << "Goal location reached" << std::endl;
 
 	               	//Stay at zone for 5 seconds
 	               	ros::Duration(5, 0).sleep();
 
-	            	//Send location to refbox
-	            	std::cout << "I'm at this zone" << std::endl;
+                    // Obtain robot pose
+                    tf_robot_pose.pose.position.x = -transform_rob.getOrigin().x();         // Why negative?
+                    tf_robot_pose.pose.position.y = -transform_rob.getOrigin().y();
+                    // Send location to refbox (topic ?)
 
-	            	//Delete location from zones vector
-	            	tf_target_zones.erase(tf_target_zones.begin() + min_indx);
-
-	            	//If all zones have been visited then go to final state 
-	            	//otherwise calculate the euclidean distance again from the new zone
-		            if(tf_target_zones.size() == 0){
+	            	// If all zones have been visited then go to final state 
+	            	// otherwise go to the next zone
+		            if(target_indx == 12){
 		            	state = SM_FINAL_STATE;
-		            }
-		            else{
-						state = SM_CALC_EU_DIST;
+		            }else{
+                        // INCREMENT INDEX
+						++target_indx;
 		            }
 	            }
 	            break;
-	        }
+            }
 	    	case SM_FINAL_STATE:
 	    		//Navigate case
 	    		std::cout << "State machine: SM_FINAL_STATE" << std::endl;	
 	            msg =  "I have finished test";
 	            std::cout << msg << std::endl;
-	            voice.data = msg;
-	            pub_speaker.publish(voice);
 	            ros::Duration(2, 0).sleep();
 	    		success = true;
 	    		fail = true;
