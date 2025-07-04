@@ -53,7 +53,7 @@
 //#define HOST "localhost"
 
 //ROBOCUP
-#define HOST "192.168.1.255"//"172.26.255.255"
+#define HOST "192.168.0.255"//"172.26.255.255"
 
 
 //#define HOST "172.23.134.255"
@@ -1735,8 +1735,7 @@ int main(int argc, char** argv)
         //Handler p(HOST, SENDPORT, SENDPORT);
         //ORIGINAL AQUI
         //p = new Handler(HOST, PUBLIC_PORT);
-        
-        
+
         p = new Handler(HOST, PUBLIC_PORT_S, PUBLIC_PORT_R);
 /*
     if(HOST == "localhost"){
@@ -1779,12 +1778,14 @@ int main(int argc, char** argv)
     catch (tf::TransformException ex){
       ROS_ERROR("%s",ex.what());
       ros::Duration(1.0).sleep();
+          std::cout << "holiiii" << std::endl;
+
     }
 
     pose_x = transform_rob.getOrigin().x();
 	pose_y = transform_rob.getOrigin().y();
 
-if(TEAM_COLOR == "CYAN"){
+if(TEAM_COLOR == "MAGENTA"){
 	pose_x -= 2;
 } else {
 	pose_x += 2;

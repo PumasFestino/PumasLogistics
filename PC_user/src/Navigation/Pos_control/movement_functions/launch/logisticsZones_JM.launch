@@ -1,0 +1,8 @@
+<launch>
+  <!-- Log_origin -->
+  <node pkg="tf" type="static_transform_publisher" name="Log_origin_BC"
+        args="-2.2 -0.8 0 0 0 0 1 map Log_origin 100"/>
+
+  <!-- Lanzar generador de zonas -->
+  <node pkg="movement_functions" type="zones_node" name="zones_node" output="screen"/>
+</launch>
