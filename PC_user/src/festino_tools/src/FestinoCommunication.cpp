@@ -1,13 +1,13 @@
 #include "festino_tools/FestinoCommunication.h"
 
-bool FestinoHardware::is_node_set = false;
+bool FestinoCommunication::is_node_set = false;
 
 ros::ServiceClient FestinoCommunication::instruction_client; 
 
 //Aquí se configuran los nodos, el tipo de mensaje, buffer, el topico, etc.
 bool FestinoCommunication::setNodeHandle(ros::NodeHandle* nh)
 {
-    if(FestinoHardware::is_node_set)
+    if(FestinoCommunication::is_node_set)
         return true;
     if(nh == 0)
         return false;
@@ -19,16 +19,19 @@ bool FestinoCommunication::setNodeHandle(ros::NodeHandle* nh)
     return true;
 }
 
-std::string FestinoCommunication::getInstruction()
+bool FestinoCommunication::getInstruction(std::vector<std::string>* tokens)
 {
     robot_to_main_communication::InstructionService srv;
     srv.request.request = "request_instruction";
+    std::vector<std::string> Tokens = *tokens;
 
-    if (instruction_client.call(srv)) {
-        return srv.response.instruction;
-    } else {
+    if(instruction_client.call(srv)){
+        Tokens.clear();
+        boost::algorithm::split(Tokens, srv.response.instruction, boost::algorithm::is_any_of(" "));
+        return true;
+    }else{
         ROS_ERROR("FestinoCommunication.->Failed to call /instruction_msg");
-        return "";
+        return false;
     }
 }
 

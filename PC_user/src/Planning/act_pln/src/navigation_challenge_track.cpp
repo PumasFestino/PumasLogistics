@@ -15,6 +15,9 @@
 #include "actionlib_msgs/GoalStatus.h"
 #include <algorithm>
 
+// festino_tools
+#include "festino_tools/FestinoCommunication.h"
+
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
 	SM_INIT,
@@ -54,7 +57,6 @@ void callback_simple_move_goal_status(const actionlib_msgs::GoalStatus::ConstPtr
 
 void transform_zones()
 {
-
 	tf::TransformListener listener;
     tf::StampedTransform transform;
 
@@ -82,6 +84,10 @@ int main(int argc, char** argv){
 	std::cout << "INITIALIZING PLANNING NODE... " << std::endl;
     ros::init(argc, argv, "SM");
     ros::NodeHandle n;
+
+    if(FestinoCommunication::setNodeHandle(&n) == false){
+        std::cout << "Node was not set" << std::endl;
+    }
 
     ros::Subscriber subRefbox = n.subscribe("/zones_refbox", 1, callback_refbox_zones);
     ros::Subscriber sub_move_goal_status   = n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
@@ -202,6 +208,9 @@ int main(int argc, char** argv){
                     // Obtain robot pose
                     tf_robot_pose.pose.position.x = -transform_rob.getOrigin().x();         // Why negative?
                     tf_robot_pose.pose.position.y = -transform_rob.getOrigin().y();
+                    if(FestinoCommunication::reportPose(tf_robot_pose.pose.position.x, tf_robot_pose.pose.position.y) == false){
+                        std::cout << "Pose could not be reported" << std::endl;
+                    }
                     // Send location to refbox (topic ?)
 
 	            	// If all zones have been visited then go to final state 

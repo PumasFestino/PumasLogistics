@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   robotino_msgs
   festino_tools
   message_generation
+  img_proc
 )
 
 ## System dependencies are found with CMake's conventions
@@ -244,3 +245,7 @@ target_link_libraries(stories ${catkin_LIBRARIES})
 add_executable(navigation src/navigation_challenge_track.cpp)
 add_dependencies(navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(navigation ${catkin_LIBRARIES})
+
+add_executable(main_track src/main_track_robot.cpp)
+add_dependencies(main_track ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(main_track ${catkin_LIBRARIES})

@@ -38,6 +38,7 @@ add_service_files(
   FILES
   Tag_with_tf.srv
   ReadQRCode.srv
+  Find_tag_Srv.srv
 )
 
 ## Generate added messages and services with any dependencies listed here
