@@ -1,4 +1,3 @@
-// reload_amcl_service.cpp
 #include <ros/ros.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -64,7 +63,7 @@ bool modifyMapCallback(movement_functions::ModifyMap::Request &req, movement_fun
     }
     catch(tf2::TransformException &ex)
     {
-        ROS_ERROR("TF error: %s", ex.what());
+        ROS_ERROR("modify_map (service) --- TF error: %s", ex.what());
         res.success = false;
         res.message = "Failed to obtain TF for the specified zone.";
         return true;
@@ -122,7 +121,7 @@ bool modifyMapCallback(movement_functions::ModifyMap::Request &req, movement_fun
     int kill_result = system("rosnode kill /amcl");
     if (kill_result != 0)
     {
-        ROS_WARN("Could not kill /amcl or it was already dead.");
+        ROS_WARN("modify_map (service) --- Could not kill /amcl or it was already dead.");
     }
 
     // Wait
@@ -132,7 +131,7 @@ bool modifyMapCallback(movement_functions::ModifyMap::Request &req, movement_fun
     int launch_result = system("roslaunch config_files amcl_reload.launch");
     if (launch_result != 0)
     {
-        ROS_ERROR("Failed to relaunch AMCL.");
+        ROS_ERROR("modify_map (service) --- Failed to relaunch AMCL.");
         res.success = false;
         res.message = "Map modified but could not reload AMCL.";
         return true;
@@ -142,6 +141,7 @@ bool modifyMapCallback(movement_functions::ModifyMap::Request &req, movement_fun
 }
 
 int main(int argc, char** argv) {
+    std::cout << "modify_map (service) --- Soft by Joshua M" << std::endl;
     ros::init(argc, argv, "modify_map_server");
     ros::NodeHandle nh;
 
@@ -156,7 +156,8 @@ int main(int argc, char** argv) {
     }
     modified_map = *base_map;
 
-    ROS_INFO("Service 'modify_map' is ready.");
+
+    ROS_INFO("modify_map (service) --- 'modify_map' is ready.");
     ros::spin();
     return 0;
 }
