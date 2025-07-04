@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf2
   tf2_ros
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -55,6 +56,16 @@ find_package(catkin REQUIRED COMPONENTS
 #   Message1.msg
 #   Message2.msg
 # )
+
+add_service_files(
+  FILES
+  ModifyMap.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -108,7 +119,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES movement_functions
-#  CATKIN_DEPENDS geometry_msgs roscpp rospy std_msgs tf2 tf2_ros
+  CATKIN_DEPENDS roscpp std_msgs message_runtime nav_msgs message_runtime
 #  DEPENDS system_lib
 )
 
@@ -210,3 +221,7 @@ include_directories(
 
 add_executable(zones_node src/zones_node.cpp)
 target_link_libraries(zones_node ${catkin_LIBRARIES})
+
+add_executable(reload_amcl_service src/reload_amcl_service.cpp)
+add_dependencies(reload_amcl_service ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(reload_amcl_service ${catkin_LIBRARIES})

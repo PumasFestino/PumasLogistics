@@ -36,7 +36,7 @@
     <!--param name="/base_link_name" value="$(arg /base_link_name)"/-->
   </node>
 
-  <node name="obs_detector"  pkg="obstacle_detector"  type="obs_detect_node"  output="screen">
+  <!--node name="obs_detector"  pkg="obstacle_detector"  type="obs_detect_node"  output="screen">
     <param name="laser_scan_topic" value="$(arg laser_scan_topic)"/>
     <param name="use_lidar" value="$(arg use_lidar)"/>
     <param name="use_sonars" value="$(arg use_sonars)"/>
@@ -53,11 +53,11 @@
     <param name="max_y" value="$(arg max_y)"/>
     <param name="min_y" value="$(arg min_y)"/>
     <param name="max_z" value="$(arg max_z)"/>
-    <param name="min_z" value="$(arg min_z)"/>
+    <param name="min_z" value="$(arg min_z)"/-->
     <!--param name="/base_link_name" value="$(arg /base_link_name)"/-->
-  </node>
+  <!--/node-->
 
-  <node name="map_augmenter"  pkg="map_augmenter"  type="map_augmenter_node"  output="screen">
+  <!--node name="map_augmenter"  pkg="map_augmenter"  type="map_augmenter_node"  output="screen">
     <param name="use_lidar" value="$(arg use_lidar)"/>
     <param name="use_sonars" value="$(arg use_sonars)"/>
     <param name="use_point_cloud" value="$(arg use_point_cloud)"/>
@@ -72,22 +72,22 @@
     <param name="max_y" value="$(arg max_y)"/>
     <param name="min_y" value="$(arg min_y)"/>
     <param name="max_z" value="$(arg max_z)"/>
-    <param name="min_z" value="$(arg min_z)"/>
+    <param name="min_z" value="$(arg min_z)"/-->
     <!--param name="/base_link_name" value="$(arg /base_link_name)"/-->
     <!--###decay_factor-->
 
-  </node>
+  <!--/node-->
 
-  <node name="mvn_pln"  pkg="mvn_pln"  type="mvn_pln_node"  output="screen">
+  <!--node name="mvn_pln"  pkg="mvn_pln"  type="mvn_pln_node"  output="screen">
     <remap from="/nav_control/goal" to="/move_base_simple/goal"/>
-    <param name="patience" value="True"/>
+    <param name="patience" value="True"/-->
     <!--param name="/base_link_name" value="$(arg /base_link_name)"/-->
-  </node>
+  <!--/node-->
 
-  <node name="prohibition_map_server" pkg="map_server" type="map_server" output="screen" args="$(arg prohibition_map_file)">
+  <!--node name="prohibition_map_server" pkg="map_server" type="map_server" output="screen" args="$(arg prohibition_map_file)">
     <remap from="/static_map" to="/prohibition_map"/>
     <remap from="/map" to="/prohibition_layer_map"/>
-  </node>
+  </node-->
  
   <node name="map_server" pkg="map_server" type="map_server" output="screen" args="$(arg static_map_file)"/>
 
