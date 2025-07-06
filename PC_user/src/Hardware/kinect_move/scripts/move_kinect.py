@@ -20,7 +20,7 @@ class KinectMotorNode:
         rospy.Service('kinect/init_tilt', InitTilt, self.handle_init)
 
         self.joint_pub = rospy.Publisher('/joint_states', JointState, queue_size=10)
-        self.joint_name = "kinect_tilt_joint"
+        self.joint_name = "platform_to_camera_base"
 
         rospy.Timer(rospy.Duration(0.1), self.publish_joint_state)
         rospy.loginfo("KinectMotorNode ready")

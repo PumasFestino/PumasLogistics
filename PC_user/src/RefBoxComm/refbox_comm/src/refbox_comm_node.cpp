@@ -1771,7 +1771,7 @@ int main(int argc, char** argv)
 
     try{
       listener_rob.waitForTransform("/Log_origin", "/base_link",   
-                                   ros::Time(0), ros::Duration(1000.0));
+                                   ros::Time(0), ros::Duration(100.0));
       listener_rob.lookupTransform("/Log_origin","/base_link",   
                                    ros::Time(0), transform_rob);
     }
@@ -1784,16 +1784,18 @@ int main(int argc, char** argv)
 
     pose_x = transform_rob.getOrigin().x();
 	pose_y = transform_rob.getOrigin().y();
+    //pose_ori = transform_rob.getOrigin().;
 
 if(TEAM_COLOR == "MAGENTA"){
-	pose_x -= 2;
+	pose_x -= 0.01;
 } else {
-	pose_x += 2;
+	pose_x += 0.01;
 }
 
+    pose_ori = 0.0f;
     std::cout << "Coordenadas x: " << pose_x << " y: " << pose_y << std::endl;
 
-    pose_ori = 0.0f;
+    //pose_ori = M_PI;
 
         ros::spinOnce();
     }

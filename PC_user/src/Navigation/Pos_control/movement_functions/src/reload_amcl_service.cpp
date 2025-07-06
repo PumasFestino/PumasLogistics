@@ -1,5 +1,6 @@
 #include <ros/ros.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <nav_msgs/GetMap.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -32,6 +33,13 @@ void publishTransform(const std::string& parent_frame, const std::string& child_
     transformStamped.transform.rotation.w = q.w();
     static_broadcaster.sendTransform(transformStamped);
 }
+
+bool staticMapCallback(nav_msgs::GetMap::Request& req, nav_msgs::GetMap::Response& res)
+{
+    res.map = modified_map;
+    return true;
+}
+
 
 bool isPointInRotatedRectangle(float px, float py, float cx, float cy, float width, float length, float theta_rad)
 {
@@ -128,7 +136,7 @@ bool modifyMapCallback(movement_functions::ModifyMap::Request &req, movement_fun
     ros::Duration(1.0).sleep();
 
     // Reload AMCL with the same parameters
-    int launch_result = system("roslaunch config_files amcl_reload.launch");
+    int launch_result = system("roslaunch config_files amcl_reload.launch &");
     if (launch_result != 0)
     {
         ROS_ERROR("modify_map (service) --- Failed to relaunch AMCL.");
@@ -147,7 +155,7 @@ int main(int argc, char** argv) {
 
     ros::ServiceServer service = nh.advertiseService("modify_map", modifyMapCallback);
     map_pub = nh.advertise<nav_msgs::OccupancyGrid>("/map", 1, true);
-
+    ros::ServiceServer static_map_srv = nh.advertiseService("/static_map", staticMapCallback);
     nav_msgs::OccupancyGrid::ConstPtr base_map = ros::topic::waitForMessage<nav_msgs::OccupancyGrid>("/map", nh);
     if (!base_map)
     {
