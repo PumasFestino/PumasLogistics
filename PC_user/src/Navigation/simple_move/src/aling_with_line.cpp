@@ -215,7 +215,7 @@ double computeAngleErrorRANSAC(const std::vector<std::pair<double, double>>& poi
             }
 
             // Detener rotación
-            cmd = geometry_msgs::Twist();
+            /*cmd = geometry_msgs::Twist();
             cmd_pub_.publish(cmd);
 
             // Fase de centrado en la línea
@@ -227,7 +227,7 @@ double computeAngleErrorRANSAC(const std::vector<std::pair<double, double>>& poi
                 ros::Duration(0.05).sleep();
             }
 
-            // Detener completamente
+            // Detener completamente*/
             cmd = geometry_msgs::Twist();
             cmd_pub_.publish(cmd);
             

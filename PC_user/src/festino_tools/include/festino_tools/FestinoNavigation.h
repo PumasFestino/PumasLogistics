@@ -91,5 +91,7 @@ public:
     static void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg);
 
     static void move_base(double x, double y, double theta, double time_out);
+    static void move_base(int x, int y, double vel, double distance);
+    static void move_base_angle(double vel, double angle);
     static void alingWithLine(bool enable);
 };

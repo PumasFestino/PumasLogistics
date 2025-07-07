@@ -1,0 +1,5 @@
+bool piece
+---
+bool success
+---
+string state

@@ -252,6 +252,74 @@ void FestinoNavigation::move_base(double x, double y, double theta, double time_
     }
 }
 
+void FestinoNavigation::move_base(int x, int y, double vel, double distance)
+{   
+    if (!cltMoveBase.isValid())
+    {
+        std::cerr << "FestinoNavigation.->Service client not initialized!" << std::endl;
+        return;
+    }
+    
+    simple_move::MoveBase::Request req;
+    simple_move::MoveBase::Response res;
+
+    req.x = float(x) * vel;
+    req.y = float(y) * vel;
+    req.theta = 0;
+
+    req.time_out = distance / vel;
+
+    if (cltMoveBase.call(req, res))
+    {
+        if (res.success)
+        {
+            std::cout << "FestinoNavigation.-> move base already" << std::endl;
+        }
+        else
+        {
+            std::cout << "FestinoNavigation.-> move base failed. " << std::endl;
+        }
+    } 
+    else
+    {
+        std::cout << "FestinoNavigation.-> move base service call failed" << std::endl;
+    }
+}
+
+void FestinoNavigation::move_base_angle(double vel, double angle)
+{   
+    if (!cltMoveBase.isValid())
+    {
+        std::cerr << "FestinoNavigation.->Service client not initialized!" << std::endl;
+        return;
+    }
+    
+    simple_move::MoveBase::Request req;
+    simple_move::MoveBase::Response res;
+
+    req.x = 0;
+    req.y = 0;
+    req.theta = vel;
+
+    req.time_out = angle / vel;
+
+    if (cltMoveBase.call(req, res))
+    {
+        if (res.success)
+        {
+            std::cout << "FestinoNavigation.-> move base already" << std::endl;
+        }
+        else
+        {
+            std::cout << "FestinoNavigation.-> move base failed. " << std::endl;
+        }
+    } 
+    else
+    {
+        std::cout << "FestinoNavigation.-> move base service call failed" << std::endl;
+    }
+}
+
 
 bool FestinoNavigation::moveDist(float distance, int timeOut_ms)
 {
