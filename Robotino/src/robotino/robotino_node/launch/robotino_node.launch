@@ -30,10 +30,10 @@
         <param name="frame_id" value="laser_link"/>
     </node> -->
 
-    <node name="ydlidar_lidar_publisher"  pkg="robotino_node"  type="ydlidar_ros_driver_node" output="screen" respawn="false" >
+    <node name="ydlidar_lidar_publisher"  pkg="ydlidar_ros_driver"  type="ydlidar_ros_driver_node" output="screen" respawn="false" >
         <!-- string property -->
         <param name="port"         type="string" value="/dev/ydlidar"/>  
-        <param name="frame_id"     type="string" value="laser"/>
+        <param name="frame_id"     type="string" value="laser_link"/>
         <param name="ignore_array"     type="string" value=""/>
 
         <!-- int property -->
