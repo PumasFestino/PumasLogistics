@@ -13,6 +13,21 @@
   
   <!-- Links -->
 
+  <!-- Base de aluminio -->
+  <link name="AluminumBase_link">    
+    <visual>
+      <geometry>
+        <mesh filename="package://manipulator_description/meshes/AluminumBase.stl" scale="0.001 0.001 0.001"/>  
+      </geometry>
+      <material name="metal"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://manipulator_description/meshes/AluminumBase.stl" scale="0.001 0.001 0.001"/>  
+      </geometry>
+    </collision>
+  </link>
+
   <!-- BaseFrame -->
   <link name="BaseFrame_link">
      <visual>
@@ -28,32 +43,32 @@
     </collision>
   </link>
   
-  <!-- Axis Y -->
-  <link name="AxisY_link">
-    <visual> 
-      <geometry>
-        <mesh filename="package://manipulator_description/meshes/Manipulator_Y_Carriage.stl" scale="0.001 0.001 0.001"/>  
-      </geometry>
-      <material name="metal"/>
-    </visual>
-    <collision>
-      <geometry>
-        <mesh filename="package://manipulator_description/meshes/Manipulator_Y_Carriage.stl" scale="0.001 0.001 0.001"/>  
-      </geometry>
-    </collision>
-  </link>
-
   <!-- Axis X -->
   <link name="AxisX_link">
     <visual> 
       <geometry>
         <mesh filename="package://manipulator_description/meshes/Manipulator_X_Carriage.stl" scale="0.001 0.001 0.001"/>  
       </geometry>
-      <material name="grey"/>
+      <material name="metal"/>
     </visual>
     <collision>
       <geometry>
         <mesh filename="package://manipulator_description/meshes/Manipulator_X_Carriage.stl" scale="0.001 0.001 0.001"/>  
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Axis Y -->
+  <link name="AxisY_link">
+    <visual> 
+      <geometry>
+        <mesh filename="package://manipulator_description/meshes/Manipulator_Y_Carriage.stl" scale="0.001 0.001 0.001"/>  
+      </geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://manipulator_description/meshes/Manipulator_Y_Carriage.stl" scale="0.001 0.001 0.001"/>  
       </geometry>
     </collision>
   </link>
@@ -120,23 +135,23 @@
 
   <!-- Joints -->
   <joint name="BaseFrame_joint" type="fixed">
-    <parent link="platform_link"/>
+    <parent link="AluminumBase_link"/>
     <child link="BaseFrame_link"/>
     <origin xyz="0.115 0.18 0.0" rpy ="0 0 3.1415 "/>
   </joint>
 
-  <joint name="AxisY_joint" type="prismatic">
+  <joint name="AxisX_joint" type="prismatic">
     <parent link="BaseFrame_link"/>
-    <child link="AxisY_link"/>
+    <child link="AxisX_link"/>
     <origin xyz="-0.00475 0.25696 0.02" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <limit lower="-0.21592" upper="0.0" effort="10.0" velocity="0.5"/>
     <dynamics damping="0.7" friction="0.1"/>
   </joint>
 
-  <joint name="AxisX_joint" type="prismatic">
-    <parent link="AxisY_link"/>
-    <child link="AxisX_link"/>
+  <joint name="AxisY_joint" type="prismatic">
+    <parent link="AxisX_link"/>
+    <child link="AxisY_link"/>
     <origin xyz="0.02504 0.056 0.081" rpy="0 0 0"/> 
     <axis xyz="1 0 0"/>
     <limit lower="0" upper="0.105" effort="10.0" velocity="0.5"/>
@@ -144,7 +159,7 @@
   </joint>
   
   <joint name="AxisZ_joint" type="prismatic">
-    <parent link="AxisX_link"/>
+    <parent link="AxisY_link"/>
     <child link="AxisZ_link"/>
     <origin xyz="0.035 -0.05745 0.21389" rpy="0 0 0"/> 
     <axis xyz="0 0 1"/>

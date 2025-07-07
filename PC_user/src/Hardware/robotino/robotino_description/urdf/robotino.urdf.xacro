@@ -139,8 +139,8 @@
       prefix="manipulator_"
       parent_link="platform_link"
       mesh_package="manipulator_description"
-      xyz="0.0 0.0 0.0"
-      rpy="0 0 1.570796"
+      xyz="0.18 -0.115 0.0"
+      rpy="0 0 1.5707"
   />
     
 </robot>
