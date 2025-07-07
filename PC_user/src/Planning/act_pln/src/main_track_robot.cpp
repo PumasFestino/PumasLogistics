@@ -34,110 +34,6 @@ std::string instructions[] = {"goto CS C_Z56 270 platform",
 
 int cont_instructions = 0;
 
-//-------------------------------------------------------------------------------//
-//-----------------------PARAMETROS Y FUNCIONES PARA DEBUG-----------------------//
-//-------------------------------------------------------------------------------//
-
-/*std::string instructions[] = {"goto CS C_Z42 0 platform",
-                              "goto CS C_Z42 0 entrance",
-                              "goto CS C_Z42 0 output",
-
-                             "goto CS M_Z61 0 entrance"};
-
-int cont_instructions = 0;
-int angulo = 315;
-std::string zone;
-
-//Función hardcodeada para hacer pruebas rápidas
-void compute_coordinates(){
-    float quat;
-
-    //Descomentar para pruebas con los parámetros reales
-    tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + param_x*cos(angulo*(M_PI/180));
-    tf_target_zone.pose.position.y = tf_target_zone.pose.position.y + param_y*sin(angulo*(M_PI/180)); 
-
-    //Descomentar para prueba con la mesa del lab
-    //tf_target_zone.pose.position.x = tf_target_zone.pose.position.x + 1;
-    //tf_target_zone.pose.position.y = tf_target_zone.pose.position.y; 
-
-    angulo = angulo - 180;                     
-	angulo_rad = angulo*M_PI/180;
-
-    std::cout << "el ángulo en grados es: " << angulo << std::endl;
-    std::cout << "el ángulo en rad es: " << angulo*M_PI/180 << std::endl;
-
-    tf::Quaternion myQuaternion;
-
-    myQuaternion.setRPY(0,0,angulo*M_PI/180);
-
-    myQuaternion=myQuaternion.normalize();
-
-    tf_target_zone.pose.orientation.x = myQuaternion[0];
-    tf_target_zone.pose.orientation.y = myQuaternion[1];
-    tf_target_zone.pose.orientation.z = myQuaternion[2];
-    tf_target_zone.pose.orientation.w = myQuaternion[3];
-
-    std::cout << "Coordenadas modificadas:" << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
-                    
-}
-
-//Funcion hardcodeada para hacer pruebas rapidas
-void transform_zone()
-{
-	tf::TransformListener listener;
-    tf::StampedTransform transform;
-
-    //Descomentar cuando se use la zona marcada del lab
-    //zone = "C_Z42";
-    zone = "M_Z61";
-
-    //Descomentar cuando se quiera ir a la mesa en medio del lab
-    //zone = "M_Z13";
-
-    //TF related stuff 
-    tf_target_zone.header.frame_id = "/map";
-    tf_target_zone.pose.position.x = 0.0;
-    tf_target_zone.pose.position.y = 0.0;
-    tf_target_zone.pose.position.z = 0.0;
-    tf_target_zone.pose.orientation.x = 0.0;
-    tf_target_zone.pose.orientation.y = 0.0;
-    tf_target_zone.pose.orientation.z = 0.0;
-    tf_target_zone.pose.orientation.w = 0.0;
-
-    std::cout << "entró al transform zones" << std::endl;
-
-    try{
-        std::cout << "entró al try" << std::endl;
-        listener.waitForTransform("/map",zone, ros::Time(0), ros::Duration(100.0));
-        listener.lookupTransform("/map",zone, ros::Time(0), transform);
-    }
-    catch (tf::TransformException ex){
-        ROS_ERROR("%s",ex.what());
-        ros::Duration(1.0).sleep();
-    }
-
-    //tf_target_zone.pose.position.x = -transform.getOrigin().x();
-    //tf_target_zone.pose.position.y = -transform.getOrigin().y();
-
-    tf_target_zone.pose.position.x = transform.getOrigin().x();
-    tf_target_zone.pose.position.y = transform.getOrigin().y();
-	tf_target_zone.pose.position.z = transform.getOrigin().z();
-	tf_target_zone.pose.orientation.x = transform.getRotation().x();
-	tf_target_zone.pose.orientation.y = transform.getRotation().y();
-	tf_target_zone.pose.orientation.z = transform.getRotation().z();
-	tf_target_zone.pose.orientation.w = transform.getRotation().w();
-
-    //std::cout << "salió del try name:" << tokens.at(2) << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
-    std::cout << "salió del try name:" << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
-    std::cout << "Las rotaciones son" << " ori x:" << tf_target_zone.pose.orientation.x << std::endl;
-    std::cout << "Las rotaciones son" << " ori y:" << tf_target_zone.pose.orientation.y << std::endl;
-    std::cout << "Las rotaciones son" << " ori z:" << tf_target_zone.pose.orientation.z << std::endl;
-    std::cout << "Las rotaciones son" << " ori w:" << tf_target_zone.pose.orientation.w << std::endl;
-}*/
-
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------
-
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
     SM_INIT,
@@ -177,17 +73,15 @@ SMState state = SM_INIT;
 //Delay para esperar a que el brazo termine de tomar o dejar pieza
 #define arm_delay 30
 
-
 //-------------------------------------------------------------------------------//
 //-------------------------------------------------------------------------------//
 
-
-//Bandera de request para instrucciones del planificador
+// Request flag for new instructions to the planner
 bool request = false;
-//String that storage instruction tokens
+// String to storage instruction tokens
 std::vector<std::string> tokens;
 
-//Función que recibe las instrucciones del planeador 
+// Receive instructions from the planner
 void request_instruction(){
     std::cout << "Request a new instruction" << std::endl;	
 
@@ -217,7 +111,6 @@ void request_instruction(){
     }
 }
 
-//Angulo en radianes
 float angulo_rad;
 //Variable que guarda el angulo en formato entero (se convierte de string a entero)
 int angulo_int = 0;
@@ -352,81 +245,43 @@ void callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
     } 
 }
 
-//Funcion que va recorriendo el arreglo de instrucciones falsas para hacer pruebas
-/*void debug_instructions(std::string instruction)
-{
-    std::cout << "Entré a la función de instrucciones" <<std::endl;	
-    //Tokenize instruction string
-    std::cout << "La instrucción es: " <<  instruction <<std::endl;	
-    tokens.clear();
-    boost::algorithm::split(tokens, instruction, boost::algorithm::is_any_of(" "));
-    
-    if(tokens[0] == "goto"){
-        state = SM_GO_TO;
-        return;
-    }
-
-    if(tokens[0] == "take" || tokens[0] == "takep"){
-        state = SM_TAKE;
-        return;
-    }
-
-    if(tokens[0] == "drop" || tokens[0] == "dropp"){
-        state = SM_DROP;
-        return;
-    }
-
-    if(tokens[0] == "ask"){
-        state = SM_ASK;
-        return;
-    }
-}*/
-
 int main(int argc, char** argv){
 	ros::Time::init();
 	bool latch;
 	std::cout << "INITIALIZING PLANNING NODE... " << std::endl;
-    ros::init(argc, argv, "SM_exploration");
+    ros::init(argc, argv, "SM_MAIN_TRACK");
+    ros::Rate loop(30);
     ros::NodeHandle n;
 	
 	FestinoNavigation::setNodeHandle(&n);
 	FestinoHRI::setNodeHandle(&n);
+    FestinoCommunication::setNodeHandle(&n);
 
-    //Subscribers and Publishers
+    // Topics
     ros::Subscriber subLaserScan 	= n.subscribe("/scan", 1, callbackLaserScan);
-    //ros::Subscriber subLateral	= n.subscribe("/move_lateral", 1, callbackMoveLat);
+    ros::Publisher pubMachineInst   = n.advertise<std_msgs::String>("/machine_instruction_msg", 1000);  // revisar con Sergio
+    ros::Publisher pubManipulator   = n.advertise<std_msgs::Int32 >("manipulator/action", 1000);        // modificar por brazo de Miguel
 
-    //ros::Subscriber subSlope        = n.subscribe("/slope_data", 10, callback_slope);
-    ros::Publisher pub_rosnav_goal  = n.advertise<geometry_msgs::PoseStamped>("/goal", 1000, true);
-    ros::Publisher pubMachineInst   = n.advertise<std_msgs::String>("/machine_instruction_msg", 1000);
-    ros::Publisher pubManipulator   = n.advertise<std_msgs::Int32 >("manipulator/action", 1000);
-    ros::Publisher pubVel           = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1000);
-
-    ros::ServiceClient aruco_client 		= n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
-
+    // Services
+    ros::ServiceClient aruco_client = n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
     img_proc::Find_tag_Srv aruco_srv;
 
-    ros::Rate loop(30);
-
-    //Para el cmd_vel
+    // cmd_vel
     geometry_msgs::Twist vel;
 
-    //String que se le envía al planeador para pedirle una instrucción 
-    std_msgs::String request_string;
-    request_string.data = "Ola khe ase";
-
-    //Entero que se le envía al nodo de la pinza 
+    // Integer for the gripper node(Review)
     std_msgs::Int32 manipulator_var;
 
-    //String que se le envía a las máquinas para pedirles cosas
+    // String with machine instruction
     std_msgs::String machine_instruction;
 
-    //String que guarda la zona en la que estamos 
+    // String to save the current zone 
     std::string zone_buffer = "M_Z01";
 
-    //String que guarda la seccion en la que estamos 
+    // String to save the current section 
     std::string sec_buffer = "indef";
 
+    // String to save the current station
     std::string station_buffer = "NA";
 
 	while(ros::ok() && !fail && !success){
@@ -436,9 +291,6 @@ int main(int argc, char** argv){
 	            std::cout << "I am ready for the main track challenge" << std::endl;
                 
 	    	    state = SM_WAIT_FOR_INSTRUCTION;
-                //state = SM_GO_TO;
-                //state = SM_FINAL_STATE;
-                //state = SM_ALIGN;
 	    		break;
 
 			case SM_WAIT_FOR_INSTRUCTION:
@@ -450,13 +302,8 @@ int main(int argc, char** argv){
                 //Descomentar cuando se hagan pruebas con el Refbox
                 //Ask for instruction once
                 if(!request){
-                    //pubRequest.publish(request_string);
                     request_instruction();
-                    std::cout << "Ya mandé el request" << std::endl;	
-                 }
-
-			    //Waiting for instruction
-	    	    state = SM_WAIT_FOR_INSTRUCTION;
+                }
 	    		break;
 
 	    	case SM_GO_TO:
@@ -486,7 +333,7 @@ int main(int argc, char** argv){
 
 		            FestinoNavigation::moveDistAngle(-move_to_machine, 0, 1000);
 
-                    //A partir de la instruccion se extrae la zona y con lookTransform se encuentran las coordenadas correspondientes
+                    // A partir de la instruccion se extrae la zona y con lookTransform se encuentran las coordenadas correspondientes
                     transform_zone();
 
                     //Dependiendo de la orientacion de la maquina y de si se quiere ir a la entrada o salida se obtienen las coordenadas
