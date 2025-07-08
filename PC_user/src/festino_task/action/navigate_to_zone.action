@@ -1,5 +1,9 @@
-//parameter
+string[] target_zones
 ---
 bool success
+string final_message
+geometry_msgs/Point final_position
 ---
-string state
+int32 current_zone_index
+string current_zone_name
+string current_state

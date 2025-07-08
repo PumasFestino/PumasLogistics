@@ -22,180 +22,284 @@
 #include "ros/time.h"
 #include "actionlib_msgs/GoalStatus.h"
 
+/*------------------------Action Messages---------------*/
+#include <festino_task/ZoneNavigationAction.h>
+
 /*------------------------Festino Tools-----------------*/
 #include "festino_tools/FestinoCommunication.h"
 
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
     SM_INIT,
-    SM_WAIT_FOR_ZONES, // Positions are sent in order based on plan
+    SM_TRANSFORM_ZONES, // Positions are sent in order based on plan
     SM_NAV_TO_ZONE,
+    SM_WAIT_AT_ZONE,
+    SM_REPORT_POSE,
     SM_FINAL_STATE
 };
 
-bool fail = false;
-bool success = false;
-SMState state = SM_INIT;
-bool flag_zones = false;
-std::vector<std_msgs::String> target_zones;
-std::vector<geometry_msgs::PoseStamped> tf_target_zones;
-std_msgs::String new_zone;
-actionlib_msgs::GoalStatus simple_move_goal_status;
-int simple_move_status_id = 0;
-
-
-void callback_refbox_zones(const std_msgs::String::ConstPtr& msg)
+class ZoneNavigationActionServer
 {
-    new_zone = *msg;
-    target_zones.push_back(new_zone);
+protected:
+    ros::NodeHandle nh_;
+    actionlib::SimpleActionServer<your_package::ZoneNavigationAction> as_;
+    std::string action_name_;
+    
+    // Action messages
+    your_package::ZoneNavigationFeedback feedback_;
+    your_package::ZoneNavigationResult result_;
+    
+    // Subscribers and Publishers
+    ros::Subscriber sub_move_goal_status_;
+    ros::Publisher pub_goal_;
+    
+    // State machine variables
+    SMState state_;
+    std::vector<std::string> target_zones_;
+    std::vector<geometry_msgs::PoseStamped> tf_target_zones_;
+    int target_index_;
+    actionlib_msgs::GoalStatus simple_move_goal_status_;
+    int simple_move_status_id_;
+    
+    // Transform listener
+    tf::TransformListener tf_listener_;
 
-    if(target_zones.size() == 12){
-        flag_zones = true;
+public:
+    ZoneNavigationActionServer(std::string name) :
+        as_(nh_, name, boost::bind(&ZoneNavigationActionServer::executeCB, this, _1), false),
+        action_name_(name),
+        state_(SM_INIT),
+        target_index_(0),
+        simple_move_status_id_(0)
+    {
+        // Initialize subscribers and publishers
+        sub_move_goal_status_ = nh_.subscribe("/simple_move/goal_reached", 10, 
+            &ZoneNavigationActionServer::callbackSimpleMoveGoalStatus, this);
+        pub_goal_ = nh_.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000);
+        
+        // Initialize FestinoCommunication
+        if(FestinoCommunication::setNodeHandle(&nh_) == false){
+            ROS_ERROR("FestinoCommunication node was not set");
+        }
+        
+        as_.start();
+        ROS_INFO("Zone Navigation Action Server Started");
     }
-}
 
-void callback_simple_move_goal_status(const actionlib_msgs::GoalStatus::ConstPtr& msg)
-{
-    simple_move_goal_status = *msg;
-    std::stringstream ss;
-    ss << msg->goal_id.id;
-    ss >> simple_move_status_id;
-}
+    ~ZoneNavigationActionServer(void) {}
 
-void transform_zones()
-{
-    tf::TransformListener listener;
-    tf::StampedTransform transform;
+    void callbackSimpleMoveGoalStatus(const actionlib_msgs::GoalStatus::ConstPtr& msg)
+    {
+        simple_move_goal_status_ = *msg;
+        std::stringstream ss;
+        ss << msg->goal_id.id;
+        ss >> simple_move_status_id_;
+    }
 
-    //Transform 12 target zones
-    for(int i=0; i<target_zones.size();i++){
-        //Obtaining destination point from string 
+    bool transformZones()
+    {
+        tf::StampedTransform transform;
+        tf_target_zones_.clear();
+        tf_target_zones_.resize(target_zones_.size());
+
+        for(int i = 0; i < target_zones_.size(); i++){
+            try{
+                tf_listener_.lookupTransform(target_zones_[i], "/map", ros::Time(0), transform);
+                
+                tf_target_zones_[i].header.frame_id = "/map";
+                tf_target_zones_[i].pose.position.x = -transform.getOrigin().x();
+                tf_target_zones_[i].pose.position.y = -transform.getOrigin().y();
+                tf_target_zones_[i].pose.position.z = 0.0;
+                tf_target_zones_[i].pose.orientation.x = 0.0;
+                tf_target_zones_[i].pose.orientation.y = 0.0;
+                tf_target_zones_[i].pose.orientation.z = 0.0;
+                tf_target_zones_[i].pose.orientation.w = 1.0;
+                
+                ROS_INFO("Transformed zone %s to position (%.2f, %.2f)", 
+                    target_zones_[i].c_str(), 
+                    tf_target_zones_[i].pose.position.x, 
+                    tf_target_zones_[i].pose.position.y);
+            }
+            catch (tf::TransformException ex){
+                ROS_ERROR("Transform failed for zone %s: %s", target_zones_[i].c_str(), ex.what());
+                return false;
+            }
+        }
+        return true;
+    }
+
+    geometry_msgs::Point getCurrentRobotPosition()
+    {
+        geometry_msgs::Point robot_pos;
+        tf::StampedTransform transform_rob;
+        
         try{
-          //listener.lookupTransform(target_zones.at(i), "/map", ros::Time(0), transform);
-            listener.lookupTransform(target_zones.at(i).data, "/map", ros::Time(0), transform);
+            tf_listener_.lookupTransform("/map", "/base_link", ros::Time(0), transform_rob);
+            robot_pos.x = transform_rob.getOrigin().x();
+            robot_pos.y = transform_rob.getOrigin().y();
+            robot_pos.z = 0.0;
         }
         catch (tf::TransformException ex){
-          ROS_ERROR("%s",ex.what());
-          ros::Duration(1.0).sleep();
+            ROS_ERROR("Failed to get robot position: %s", ex.what());
         }
-
-        tf_target_zones.at(i).pose.position.x = -transform.getOrigin().x();
-        tf_target_zones.at(i).pose.position.y = -transform.getOrigin().y();
-        // IS ORIENTATION NEEDED ??
-    }
-}
-
-int main(int argc, char** argv){
-    ros::Time::init();
-    bool latch;
-    std::cout << "INITIALIZING PLANNING NODE... " << std::endl;
-    ros::init(argc, argv, "SM");
-    ros::NodeHandle n;
-
-    if(FestinoCommunication::setNodeHandle(&n) == false){
-        std::cout << "Node was not set" << std::endl;
+        
+        return robot_pos;
     }
 
-    ros::Subscriber subRefbox = n.subscribe("/zones_refbox", 1, callback_refbox_zones);
-    ros::Subscriber sub_move_goal_status   = n.subscribe("/simple_move/goal_reached", 10, callback_simple_move_goal_status);
-    ros::Publisher pub_goal = n.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000); //, latch=True);
-
-    ros::Rate loop(30);
-
-    std::string msg;
-
-    int target_indx = 0;
-
-    // Reset zones pose
-    for(int i=0; i<target_zones.size(); i++){
-        tf_target_zones.at(i).header.frame_id = "/map";
-        tf_target_zones.at(i).pose.position.x = 0.0;
-        tf_target_zones.at(i).pose.position.y = 0.0;
-        tf_target_zones.at(i).pose.position.z = 0.0;
-        tf_target_zones.at(i).pose.orientation.x = 0.0;
-        tf_target_zones.at(i).pose.orientation.y = 0.0;
-        tf_target_zones.at(i).pose.orientation.z = 0.0;
-        tf_target_zones.at(i).pose.orientation.w = 0.0;
+    void updateFeedback(const std::string& current_state)
+    {
+        feedback_.current_zone_index = target_index_;
+        feedback_.current_state = current_state;
+        feedback_.current_position = getCurrentRobotPosition();
+        
+        if(target_index_ < target_zones_.size()){
+            feedback_.current_zone_name = target_zones_[target_index_];
+        }
+        
+        if(target_zones_.size() > 0){
+            feedback_.progress_percentage = (float)target_index_ / (float)target_zones_.size() * 100.0;
+        }
+        
+        as_.publishFeedback(feedback_);
     }
 
-    while(ros::ok() && !fail && !success){
-        switch(state){
-            case SM_INIT:
-                //Init case
-                std::cout << "State machine: SM_INIT" << std::endl; 
-                msg = "Ready for the navigation challenge";
-                std::cout << msg << std::endl;
-                ros::Duration(2, 0).sleep();
-                state = SM_WAIT_FOR_ZONES;
-                break;
-
-            case SM_WAIT_FOR_ZONES:
-                //Wating for zone case
-                std::cout << "State machine: SM_WAIT_FOR_ZONE" << std::endl;
-                msg = "Wating for target zone";
-                std::cout << msg << std::endl;
-                ros::Duration(2, 0).sleep();
-                sleep(1);
-
-                //Waiting for 12 zones
-                if(flag_zones == false){
-                    state = SM_WAIT_FOR_ZONES;  
-                }   
-                else{
-                    transform_zones();
-                    state = SM_NAV_TO_ZONE; 
-                }
-                break;
-            case SM_NAV_TO_ZONE:{
-                //Wait for finished navigation
-                std::cout << "State machine: SM_NAV_TO_ZONE" << std::endl;
-                std::cout << "Navigating to destination point" << std::endl;
-                ros::Duration(3, 0).sleep();
-
-                //Obtaining robot location
-                geometry_msgs::PoseStamped tf_robot_pose;
-                tf::TransformListener listener_rob;
-                tf::StampedTransform transform_rob;
-
-                pub_goal.publish(tf_target_zones.at(target_indx));
-
-                if(simple_move_goal_status.status == actionlib_msgs::GoalStatus::SUCCEEDED && simple_move_status_id == -1){
-                    std::cout << "Goal location reached" << std::endl;
-
-                    //Stay at zone for 5 seconds
-                    ros::Duration(5, 0).sleep();
-
-                    // Obtain robot pose
-                    tf_robot_pose.pose.position.x = -transform_rob.getOrigin().x();         // Why negative?
-                    tf_robot_pose.pose.position.y = -transform_rob.getOrigin().y();
-                    if(FestinoCommunication::reportPose(tf_robot_pose.pose.position.x, tf_robot_pose.pose.position.y) == false){
-                        std::cout << "Pose could not be reported" << std::endl;
-                    }
-                    // Send location to refbox (topic ?)
-
-                    // If all zones have been visited then go to final state 
-                    // otherwise go to the next zone
-                    if(target_indx == 12){
-                        state = SM_FINAL_STATE;
-                    }else{
-                        // INCREMENT INDEX
-                        ++target_indx;
-                    }
-                }
-                break;
+    void executeCB(const your_package::ZoneNavigationGoalConstPtr &goal)
+    {
+        ros::Rate r(10); // 10 Hz
+        bool success = true;
+        
+        // Initialize from goal
+        target_zones_ = goal->target_zones;
+        target_index_ = 0;
+        state_ = SM_INIT;
+        
+        ROS_INFO("Starting zone navigation with %lu zones", target_zones_.size());
+        
+        // Main state machine loop
+        while(ros::ok() && success)
+        {
+            // Check for preemption
+            if(as_.isPreemptRequested()){
+                ROS_INFO("%s: Preempted", action_name_.c_str());
+                as_.setPreempted();
+                return;
             }
-            case SM_FINAL_STATE:
-                //Navigate case
-                std::cout << "State machine: SM_FINAL_STATE" << std::endl;  
-                msg =  "I have finished test";
-                std::cout << msg << std::endl;
-                ros::Duration(2, 0).sleep();
-                success = true;
-                fail = true;
-                break;
+            
+            switch(state_)
+            {
+                case SM_INIT:
+                    ROS_INFO("State: SM_INIT");
+                    updateFeedback("Initializing navigation");
+                    
+                    if(target_zones_.empty()){
+                        ROS_ERROR("No target zones provided");
+                        success = false;
+                        break;
+                    }
+                    
+                    state_ = SM_TRANSFORM_ZONES;
+                    ros::Duration(1.0).sleep();
+                    break;
+                
+                case SM_TRANSFORM_ZONES:
+                    ROS_INFO("State: SM_TRANSFORM_ZONES");
+                    updateFeedback("Transforming zone coordinates");
+                    
+                    if(!transformZones()){
+                        ROS_ERROR("Failed to transform zones");
+                        success = false;
+                        break;
+                    }
+                    
+                    state_ = SM_NAV_TO_ZONE;
+                    break;
+                
+                case SM_NAV_TO_ZONE:
+                    ROS_INFO("State: SM_NAV_TO_ZONE - Navigating to zone %s (%d/%lu)", 
+                        target_zones_[target_index_].c_str(), 
+                        target_index_ + 1, 
+                        target_zones_.size());
+                    
+                    updateFeedback("Navigating to zone: " + target_zones_[target_index_]);
+                    
+                    // Publish navigation goal
+                    pub_goal_.publish(tf_target_zones_[target_index_]);
+                    
+                    // Wait for navigation to complete
+                    if(simple_move_goal_status_.status == actionlib_msgs::GoalStatus::SUCCEEDED && 
+                       simple_move_status_id_ == -1){
+                        ROS_INFO("Reached zone %s", target_zones_[target_index_].c_str());
+                        state_ = SM_WAIT_AT_ZONE;
+                    }
+                    else if(simple_move_goal_status_.status == actionlib_msgs::GoalStatus::ABORTED){
+                        ROS_ERROR("Navigation to zone %s failed", target_zones_[target_index_].c_str());
+                        success = false;
+                    }
+                    break;
+                
+                case SM_WAIT_AT_ZONE:
+                    ROS_INFO("State: SM_WAIT_AT_ZONE");
+                    updateFeedback("Waiting at zone: " + target_zones_[target_index_]);
+                    
+                    // Stay at zone for 5 seconds
+                    ros::Duration(5.0).sleep();
+                    state_ = SM_REPORT_POSE;
+                    break;
+                
+                case SM_REPORT_POSE:
+                    ROS_INFO("State: SM_REPORT_POSE");
+                    updateFeedback("Reporting pose for zone: " + target_zones_[target_index_]);
+                    
+                    // Report current position
+                    geometry_msgs::Point current_pos = getCurrentRobotPosition();
+                    if(FestinoCommunication::reportPose(current_pos.x, current_pos.y) == false){
+                        ROS_WARN("Pose could not be reported for zone %s", target_zones_[target_index_].c_str());
+                    }
+                    
+                    // Move to next zone or finish
+                    target_index_++;
+                    if(target_index_ >= target_zones_.size()){
+                        state_ = SM_FINAL_STATE;
+                    }
+                    else{
+                        state_ = SM_NAV_TO_ZONE;
+                    }
+                    break;
+                
+                case SM_FINAL_STATE:
+                    ROS_INFO("State: SM_FINAL_STATE");
+                    updateFeedback("Navigation sequence completed");
+                    
+                    // Set final result
+                    result_.success = true;
+                    result_.final_message = "Successfully visited all zones";
+                    result_.final_position = getCurrentRobotPosition();
+                    
+                    ROS_INFO("Zone navigation completed successfully");
+                    as_.setSucceeded(result_);
+                    return;
+            }
+            
+            ros::spinOnce();
+            r.sleep();
         }
-        ros::spinOnce();
-        loop.sleep();
+        
+        // If we exit the loop due to failure
+        if(!success){
+            result_.success = false;
+            result_.final_message = "Navigation failed";
+            result_.final_position = getCurrentRobotPosition();
+            as_.setAborted(result_);
+        }
     }
+};
+
+int main(int argc, char** argv)
+{
+    ros::init(argc, argv, "zone_navigation_action_server");
+    
+    ZoneNavigationActionServer server("zone_navigation");
+    ros::spin();
+    
     return 0;
 }
