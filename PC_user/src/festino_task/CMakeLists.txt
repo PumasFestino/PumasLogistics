@@ -75,7 +75,6 @@ find_package(catkin REQUIRED COMPONENTS
    FILES
    pose_robot_station.action  #For aling with MPS
    pose_robot_piece.action    #For find piece
-   navigate_to_zone.action
  )
 
 ## Generate added messages and services with any dependencies listed here

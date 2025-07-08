@@ -1,5 +1,3 @@
-//Drive to 12 randomly generated target zones.
-//Refbox sends all 12 zones at once.
 #include<iostream>
 #include <cmath>
 #include "ros/ros.h"
