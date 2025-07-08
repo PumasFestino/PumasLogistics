@@ -3,9 +3,11 @@
 bool FestinoHardware::is_node_set = false;
 
 ros::Publisher FestinoHardware::pub_digital;
-ros::Publisher FestinoHardware::pub_head_orientation;
+
+ros::Publisher FestinoHardware::pub_move_manipulator;
+ros::Publisher FestinoHardware::pub_move_manipulator_home;
 ros::Publisher FestinoHardware::pub_gripper;
-ros::ServiceClient FestinoHardware::arm_client;
+
 ros::ServiceClient FestinoHardware::kinect_client;
 ros::ServiceClient FestinoHardware::kinect_init;
     
@@ -18,30 +20,19 @@ bool FestinoHardware::setNodeHandle(ros::NodeHandle* nh)
     if(nh == 0)
         return false;
     std::cout << "FestinoHardware.->Setting ros node..." << std::endl;
-    
-    FestinoHardware::pub_head_orientation   = nh -> advertise       <std_msgs::Float64MultiArray>("/hardware/head/goal_pose", 1000);
-    FestinoHardware::pub_gripper            = nh -> advertise       <std_msgs::Float64>("/hardware/left_arm/goal_gripper", 1000);
+
+    //Publisher for color led
     FestinoHardware::pub_digital            = nh -> advertise       <robotino_msgs::DigitalReadings>("/set_digital_values", 1000);
-    FestinoHardware::arm_client             = nh -> serviceClient   <arms::MoveArm>("move_left_arm");
+
+    //Publishers for manipulator
+    FestinoHardware::pub_move_manipulator       = nh -> advertise   <geometry_msgs::Point>("/manipulator_move", 1000);
+    FestinoHardware::pub_move_manipulator_home  = nh -> advertise   <std_msgs::Bool>("/manipulator_home", 1000);
+    FestinoHardware::pub_gripper                = nh -> advertise   <std_msgs::Bool>("/manipulator_gripper", 1000);
+    
+    //Service Client for move the yaw angle
     FestinoHardware::kinect_client          = nh -> serviceClient   <kinect_move::MoveTilt> ("/kinect/move_tilt");
     FestinoHardware::kinect_init            = nh -> serviceClient   <kinect_move::InitTilt> ("/kinect/init_tilt");
     return true;
-}
-
-void FestinoHardware::setHeadOrientation(float yaw, float pitch)
-{
-    std_msgs::Float64MultiArray msg;
-    msg.data.resize(2);
-    msg.data[0] = yaw;
-    msg.data[1] = pitch;
-    FestinoHardware::pub_head_orientation.publish(msg);
-}
-
-void FestinoHardware::setGripperPose(float gripper)
-{
-    std_msgs::Float64 msg;
-    msg.data = gripper;
-    FestinoHardware::pub_gripper.publish(msg);
 }
 
 void FestinoHardware::setColorLed(std::string colorName)
@@ -101,53 +92,14 @@ void FestinoHardware::setColorLed(std::string colorName)
         ros::Duration(0.5, 0).sleep();
     }
 
-}
+    std::cout << "FestinoHardware -> set led color: " << colorName << "." << std::endl;
 
-void FestinoHardware::setArmPose(float x, float y, float z, float roll, float pitch, float yaw) 
-{
-    arms::MoveArm srv;
-    srv.request.x = x;
-    srv.request.y = y;
-    srv.request.z = z;
-    srv.request.roll = roll;
-    srv.request.pitch = pitch;
-    srv.request.yaw = yaw;
-    srv.request.pose_name = "";  // String vacío para indicar modo cartesiano
-
-    if (arm_client.call(srv)) {
-        if (!srv.response.success) {
-            ROS_ERROR("Failed to move arm to pose: %s", srv.response.message.c_str());
-        }
-    } else {
-        ROS_ERROR("Failed to call move_left_arm service");
-    }
-}
-
-void FestinoHardware::setArmPose(std::string pose_name)
-{
-    arms::MoveArm srv;
-    srv.request.x = 0;
-    srv.request.y = 0;
-    srv.request.z = 0;
-    srv.request.roll = 0;
-    srv.request.pitch = 0;
-    srv.request.yaw = 0;
-    srv.request.pose_name = pose_name;
-
-    if (arm_client.call(srv)) {
-        if (!srv.response.success) {
-            ROS_ERROR("Failed to move arm to '%s' pose: %s", 
-                     pose_name.c_str(), srv.response.message.c_str());
-        }
-    } else {
-        ROS_ERROR("Failed to call move_left_arm service");
-    }
 }
 
 bool FestinoHardware::move_kinect(float theta, double time_out)
 {   
     if (!kinect_client.isValid()) {
-        std::cerr << "FestinoNavigation.->Service client not initialized!" << std::endl;
+        std::cerr << "FestinoHardware -> Service client not initialized!" << std::endl;
         return false;
     }
     
@@ -161,12 +113,12 @@ bool FestinoHardware::move_kinect(float theta, double time_out)
     {
         if (res.success)
         {
-            std::cout << "FestinoHardware.-> move kinect already" << std::endl;
+            std::cout << "FestinoHardware -> move kinect already" << std::endl;
             return true;
         }
         else
         {
-            std::cout << "FestinoHardware.-> move kinect failed. " << std::endl;
+            std::cout << "FestinoHardware -> move kinect failed. " << std::endl;
             return false;
         }
     } 
@@ -180,7 +132,7 @@ bool FestinoHardware::move_kinect(float theta, double time_out)
 bool FestinoHardware::init_kinect()
 {   
     if (!kinect_init.isValid()) {
-        std::cerr << "FestinoHardware.->Service client not initialized!" << std::endl;
+        std::cerr << "FestinoHardware -> Service client not initialized!" << std::endl;
         return false;
     }
     kinect_move::InitTilt::Request req;
@@ -188,6 +140,42 @@ bool FestinoHardware::init_kinect()
     kinect_init.call(req, res);
     if (res.success)
         {
-            std::cout << "FestinoHardware.-> init kinect " << res << std::endl;
+            std::cout << "FestinoHardware -> init kinect " << res << std::endl;
         }
+}
+
+void FestinoHardware::move_manipulator(float x, float y, float z) 
+{
+    geometry_msgs::Point point;
+    point.x = x;
+    point.y = y;
+    point.z = z;
+
+    pub_move_manipulator.publish(point);
+    ros::Duration(0.5, 0).sleep();
+   
+    std::cout << "FestinoHardware -> Move manipulator: x: " << point.x << " mm; y: " << point.y << " mm; z: " << point.z << " mm." << std::endl;
+}
+
+void FestinoHardware::move_manipulator_home(bool state) 
+{
+    std_msgs::Bool msgs;
+    msgs.data = state;
+    
+    pub_move_manipulator_home.publish(msgs);
+    ros::Duration(0.5, 0).sleep();
+   
+    std::cout << "FestinoHardware -> Move manipulator: Go Home." << std::endl;
+}
+
+
+void FestinoHardware::move_gripper(bool state)
+{
+    std_msgs::Bool msg;
+    msg.data = state;
+    
+    pub_gripper.publish(msg);
+    ros::Duration(0.5, 0).sleep();
+    
+    std::cout << "FestinoHardware -> move gripper: " << (state ? "open." : "close.") << std::endl;
 }

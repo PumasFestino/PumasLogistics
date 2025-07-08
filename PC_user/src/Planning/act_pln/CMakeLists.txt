@@ -215,11 +215,6 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-
-add_executable(test_mvbase src/test_mvbase.cpp)
-add_dependencies(test_mvbase ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_mvbase ${catkin_LIBRARIES})
-
 add_executable(navigation src/navigation_challenge_track.cpp)
 add_dependencies(navigation ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(navigation ${catkin_LIBRARIES})

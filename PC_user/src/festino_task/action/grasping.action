@@ -1,0 +1,5 @@
+string action_manip
+---
+bool success
+---
+string state
