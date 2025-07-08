@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-<xacro:macro name="prismatic_manipulator" params="prefix parent_link mesh_package xyz rpy">
+<xacro:macro name="prismatic_manipulator" params="parent_link mesh_package xyz rpy">
   <xacro:property name="scale" value="0.001 0.001 0.001"/>
 
   <!-- Materiales -->
@@ -12,7 +12,7 @@
   </material>
 
   <!-- Links -->
-  <link name="${prefix}BaseFrame_link">
+  <link name="BaseFrame_link">
     <visual>
       <geometry>
         <mesh filename="package://${mesh_package}/meshes/Manipulator_Base_Frame.stl" scale="${scale}"/>
@@ -26,7 +26,7 @@
     </collision>
   </link>
 
-  <link name="${prefix}AxisY_link">
+  <link name="AxisY_link">
     <visual>
       <geometry>
         <mesh filename="package://${mesh_package}/meshes/Manipulator_Y_Carriage.stl" scale="${scale}"/>
@@ -40,7 +40,7 @@
     </collision>
   </link>
 
-  <link name="${prefix}AxisX_link">
+  <link name="AxisX_link">
     <visual>
       <geometry>
         <mesh filename="package://${mesh_package}/meshes/Manipulator_X_Carriage.stl" scale="${scale}"/>
@@ -54,7 +54,7 @@
     </collision>
   </link>
 
-  <link name="${prefix}AxisZ_link">
+  <link name="AxisZ_link">
     <visual>
       <geometry>
         <mesh filename="package://${mesh_package}/meshes/Manipulator_Z_Carriage.stl" scale="${scale}"/>
@@ -68,7 +68,7 @@
     </collision>
   </link>
 
-  <link name="${prefix}ClawBase_link">
+  <link name="ClawBase_link">
     <visual>
       <geometry>
         <mesh filename="package://${mesh_package}/meshes/Manipulator_Claw_Base.stl" scale="${scale}"/>
@@ -82,7 +82,7 @@
     </collision>
   </link>
 
-  <link name="${prefix}ClawShovelR_link">
+  <link name="ClawShovelR_link">
     <visual>
       <geometry>
         <mesh filename="package://${mesh_package}/meshes/Manipulador_Claw_Shovel.stl" scale="${scale}"/>
@@ -96,7 +96,7 @@
     </collision>
   </link>
 
-  <link name="${prefix}ClawShovelL_link">
+  <link name="ClawShovelL_link">
     <visual>
       <geometry>
         <mesh filename="package://${mesh_package}/meshes/Manipulador_Claw_Shovel.stl" scale="${scale}"/>
@@ -111,57 +111,57 @@
   </link>
 
   <!-- Joints -->
-  <joint name="${prefix}BaseFrame_joint" type="fixed">
+  <joint name="BaseFrame_joint" type="fixed">
     <parent link="${parent_link}"/>
-    <child link="${prefix}BaseFrame_link"/>
+    <child link="BaseFrame_link"/>
     <origin xyz="${xyz}" rpy="${rpy}"/>
   </joint>
 
-  <joint name="${prefix}AxisY_joint" type="prismatic">
-    <parent link="${prefix}BaseFrame_link"/>
-    <child link="${prefix}AxisY_link"/>
+  <joint name="AxisY_joint" type="prismatic">
+    <parent link="BaseFrame_link"/>
+    <child link="AxisY_link"/>
     <origin xyz="-0.00475 0.25696 0.02" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
     <limit lower="-0.21592" upper="0.0" effort="10.0" velocity="0.5"/>
     <dynamics damping="0.7" friction="0.1"/>
   </joint>
 
-  <joint name="${prefix}AxisX_joint" type="prismatic">
-    <parent link="${prefix}AxisY_link"/>
-    <child link="${prefix}AxisX_link"/>
+  <joint name="AxisX_joint" type="prismatic">
+    <parent link="AxisY_link"/>
+    <child link="AxisX_link"/>
     <origin xyz="0.02504 0.056 0.081" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
     <limit lower="0" upper="0.105" effort="10.0" velocity="0.5"/>
     <dynamics damping="0.5" friction="0.1"/>
   </joint>
 
-  <joint name="${prefix}AxisZ_joint" type="prismatic">
-    <parent link="${prefix}AxisX_link"/>
-    <child link="${prefix}AxisZ_link"/>
+  <joint name="AxisZ_joint" type="prismatic">
+    <parent link="AxisX_link"/>
+    <child link="AxisZ_link"/>
     <origin xyz="0.035 -0.05745 0.21389" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
     <limit lower="-0.18" upper="0" effort="5.0" velocity="0.3"/>
     <dynamics damping="0.3" friction="0.05"/>
   </joint>
 
-  <joint name="${prefix}ClawBase_joint" type="fixed">
-    <parent link="${prefix}AxisZ_link"/>
-    <child link="${prefix}ClawBase_link"/>
+  <joint name="ClawBase_joint" type="fixed">
+    <parent link="AxisZ_link"/>
+    <child link="ClawBase_link"/>
     <origin xyz="-0.01 -0.24 0.03" rpy="0 0 0"/>
   </joint>
 
-  <joint name="${prefix}ClawShovelR_joint" type="prismatic">
-    <parent link="${prefix}ClawBase_link"/>
-    <child link="${prefix}ClawShovelR_link"/>
+  <joint name="ClawShovelR_joint" type="prismatic">
+    <parent link="ClawBase_link"/>
+    <child link="ClawShovelR_link"/>
     <origin xyz="-0.0357 -0.04494 -0.04010" rpy="0 0 0"/>
     <axis xyz="1 0 0"/>
     <limit lower="0" upper="0.020" effort="5.0" velocity="0.3"/>
     <dynamics damping="0.3" friction="0.05"/>
   </joint>
 
-  <joint name="${prefix}ClawShovelL_joint" type="prismatic">
-    <parent link="${prefix}ClawBase_link"/>
-    <child link="${prefix}ClawShovelL_link"/>
+  <joint name="ClawShovelL_joint" type="prismatic">
+    <parent link="ClawBase_link"/>
+    <child link="ClawShovelL_link"/>
     <origin xyz="0.0557 0.0549 -0.04010" rpy="0 0 3.141516"/>
     <axis xyz="1 0 0"/>
     <limit lower="0" upper="0.020" effort="5.0" velocity="0.3"/>

@@ -1,14 +1,14 @@
 <launch>
     <!-- Publica el URDF -->
-    <param name="robot_description" command="$(find xacro)/xacro '$(find manipulator_description)/urdf/manipulator.urdf'" />
+    <!--param name="robot_description" command="$(find xacro)/xacro '$(find manipulator_description)/urdf/manipulator.urdf'" /-->
 
     <!-- Lanza robot_state_publisher -->
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen" />
+    <!--node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen" /-->
 
     <!-- Lanza state_publisher.py que publica las posiciones -->
     <node name="state_publisher_node" pkg="manipulator_control" type="state_publisher.py" output="screen" />
 
     <!-- Lanza RViz con delay para asegurarte que ya están publicando los tf -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find manipulator_control)/launch/manipulator.rviz" required="true" />
+    <!--node name="rviz" pkg="rviz" type="rviz" args="-d $(find manipulator_control)/launch/manipulator.rviz" required="true" /-->
 
 </launch>

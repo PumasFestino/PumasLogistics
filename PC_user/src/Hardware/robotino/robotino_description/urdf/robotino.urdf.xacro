@@ -135,8 +135,7 @@
   </joint>
 
   <!-- ==================== Manipulator (Prismatic) ==================== -->
-  <xacro:prismatic_manipulator 
-      prefix="manipulator_"
+  <xacro:prismatic_manipulator
       parent_link="platform_link"
       mesh_package="manipulator_description"
       xyz="0.18 -0.115 0.0"
