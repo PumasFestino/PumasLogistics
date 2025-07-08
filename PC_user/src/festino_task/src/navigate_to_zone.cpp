@@ -11,6 +11,7 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <boost/bind.hpp>
 
 /*------------------------ROS Libraries-----------------*/
 #include "ros/ros.h"
@@ -20,10 +21,11 @@
 #include <tf/transform_listener.h>
 #include "robotino_msgs/DigitalReadings.h"
 #include "ros/time.h"
+#include <actionlib/server/simple_action_server.h>
 #include "actionlib_msgs/GoalStatus.h"
 
 /*------------------------Action Messages---------------*/
-#include <festino_task/ZoneNavigationAction.h>
+#include <festino_task/navigate_to_zoneAction.h>
 
 /*------------------------Festino Tools-----------------*/
 #include "festino_tools/FestinoCommunication.h"
@@ -38,16 +40,16 @@ enum SMState {
     SM_FINAL_STATE
 };
 
-class ZoneNavigationActionServer
+class NavigateToZoneActionServer
 {
 protected:
     ros::NodeHandle nh_;
-    actionlib::SimpleActionServer<your_package::ZoneNavigationAction> as_;
+    actionlib::SimpleActionServer<festino_task::navigate_to_zoneAction> as_;
     std::string action_name_;
     
     // Action messages
-    your_package::ZoneNavigationFeedback feedback_;
-    your_package::ZoneNavigationResult result_;
+    festino_task::navigate_to_zoneFeedback feedback_;
+    festino_task::navigate_to_zoneResult result_;
     
     // Subscribers and Publishers
     ros::Subscriber sub_move_goal_status_;
@@ -65,8 +67,8 @@ protected:
     tf::TransformListener tf_listener_;
 
 public:
-    ZoneNavigationActionServer(std::string name) :
-        as_(nh_, name, boost::bind(&ZoneNavigationActionServer::executeCB, this, _1), false),
+    NavigateToZoneActionServer(std::string name) :
+        as_(nh_, name, boost::bind(&NavigateToZoneActionServer::executeCB, this, _1), false),
         action_name_(name),
         state_(SM_INIT),
         target_index_(0),
@@ -74,7 +76,7 @@ public:
     {
         // Initialize subscribers and publishers
         sub_move_goal_status_ = nh_.subscribe("/simple_move/goal_reached", 10, 
-            &ZoneNavigationActionServer::callbackSimpleMoveGoalStatus, this);
+            &NavigateToZoneActionServer::callbackSimpleMoveGoalStatus, this);
         pub_goal_ = nh_.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1000);
         
         // Initialize FestinoCommunication
@@ -86,7 +88,7 @@ public:
         ROS_INFO("Zone Navigation Action Server Started");
     }
 
-    ~ZoneNavigationActionServer(void) {}
+    ~NavigateToZoneActionServer(void) {}
 
     void callbackSimpleMoveGoalStatus(const actionlib_msgs::GoalStatus::ConstPtr& msg)
     {
@@ -163,7 +165,7 @@ public:
         as_.publishFeedback(feedback_);
     }
 
-    void executeCB(const your_package::ZoneNavigationGoalConstPtr &goal)
+    void executeCB(const festino_task::navigate_to_zoneGoalConstPtr &goal)
     {
         ros::Rate r(10); // 10 Hz
         bool success = true;
@@ -246,7 +248,7 @@ public:
                     state_ = SM_REPORT_POSE;
                     break;
                 
-                case SM_REPORT_POSE:
+                case SM_REPORT_POSE:{
                     ROS_INFO("State: SM_REPORT_POSE");
                     updateFeedback("Reporting pose for zone: " + target_zones_[target_index_]);
                     
@@ -265,7 +267,7 @@ public:
                         state_ = SM_NAV_TO_ZONE;
                     }
                     break;
-                
+                }
                 case SM_FINAL_STATE:
                     ROS_INFO("State: SM_FINAL_STATE");
                     updateFeedback("Navigation sequence completed");
@@ -298,7 +300,7 @@ int main(int argc, char** argv)
 {
     ros::init(argc, argv, "zone_navigation_action_server");
     
-    ZoneNavigationActionServer server("zone_navigation");
+    NavigateToZoneActionServer server("zone_navigation");
     ros::spin();
     
     return 0;
