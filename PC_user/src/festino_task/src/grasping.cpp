@@ -65,7 +65,8 @@ protected:
     // For proportional control
     float error_x = 0.0;
     float error_y = 0.0;
-    float threshold = 0.4;
+    float threshold = 100;
+    float threshold_1 = 50;
 
     // For aligning with the piece
     float move_x_piece = 15.0;
@@ -127,9 +128,12 @@ public:
                     FestinoHardware::move_manipulator(move_x_center, move_y_center, 0.0);
                     do {
                         current_state = "SM_FIND_BAND --- Move manipulator";
-                        error_y = FestinoVision::findBand();
-                        FestinoHardware::move_manipulator(0.0, error_y, 0.0);
-                    } while (error_y < threshold);
+                        
+                        error_x = FestinoVision::findBand();
+                        std::cout << "Holiiis:" << error_x <<std::endl;
+                        FestinoHardware::move_manipulator(-error_x*0.1, 0.0, 0.0);
+                        ros::Duration(0.3).sleep();
+                    } while (abs(error_x) > threshold);
                     state_ = SM_ALIGN_WITH_BAND;
                     break;
 
@@ -137,8 +141,10 @@ public:
                     current_state = "SM_ALIGN_WITH_BAND --- Centering";
                     do {
                         error_y = FestinoVision::centerBand();
-                        FestinoHardware::move_manipulator(0.0, error_y, 0.0);
-                    } while (error_y < threshold);
+                        FestinoHardware::move_manipulator(0.0, error_y*0.1, 0.0);
+                        ros::Duration(0.3).sleep();
+                        
+                    } while (abs(error_x) > threshold_1);
                     state_ = (action_manip_ == "drop") ? SM_FIND_END_BAND : SM_FIND_PIECE;
                     break;
 
@@ -146,8 +152,9 @@ public:
                     current_state = "SM_FIND_PIECE --- Locating";
                     do {
                         error_y = FestinoVision::findPiece();
-                        FestinoHardware::move_manipulator(0.0, error_y, 0.0);
-                    } while (error_y < threshold);
+                        FestinoHardware::move_manipulator(0.0, error_y*0.1, 0.0);
+                        ros::Duration(0.3).sleep();
+                    } while (abs(error_y) > threshold_1);
                     state_ = SM_ALIGN_WITH_PIECE;
                     break;
 
@@ -155,8 +162,9 @@ public:
                     current_state = "SM_FIND_END_BAND --- Searching";
                     do {
                         error_y = FestinoVision::findEndBand();
-                        FestinoHardware::move_manipulator(0.0, error_y, 0.0);
-                    } while (error_y < threshold);
+                        FestinoHardware::move_manipulator(0.0, error_y*0.1, 0.0);
+                        ros::Duration(0.3).sleep();
+                    } while (abs(error_y) > threshold);
                     FestinoHardware::move_manipulator(move_x_band, move_y_band, 0.0);
                     state_ = SM_DOWN_GRIPPER;
                     break;

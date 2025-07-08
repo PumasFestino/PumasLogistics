@@ -47,7 +47,7 @@ bool FestinoVision::setNodeHandle(ros::NodeHandle* _nh)
     cltQRSrv        =   nh -> serviceClient<img_proc::ReadQRCode>("/vision/read_qr_code");
 
     //Logistics camera tasks
-    cltCameraTask   =   nh -> serviceClient<img_proc::ReadQRCode>("/vision/run_camera_task");
+    cltCameraTask   =   nh -> serviceClient<vision_logistics::RunTask>("/vision/run_camera_task");
 
     //Pose Estimation controls
     nh  ->  setParam("/pose_2d_enabled", true);
@@ -174,7 +174,7 @@ float FestinoVision::findBand()
     {
         std::cout << "Success: " << srv.response.success << std:: endl;
     }
-    return srv.response.error_y;
+    return srv.response.error_x;
     
 }
 
@@ -187,7 +187,7 @@ float FestinoVision::centerBand()
     {
         std::cout << "Success: " << srv.response.success << std:: endl;
     }
-    return srv.response.error_y;
+    return srv.response.error_x;
     
 }
 
@@ -200,7 +200,7 @@ float FestinoVision::findPiece()
     {
         std::cout << "Success: " << srv.response.success << std:: endl;
     }
-    return srv.response.error_x;
+    return srv.response.error_y;
     
 }
 
@@ -213,6 +213,6 @@ float FestinoVision::findEndBand()
     {
         std::cout << "Success: " << srv.response.success << std:: endl;
     }
-    return srv.response.error_x;
+    return srv.response.error_y;
     
 }
