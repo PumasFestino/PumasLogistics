@@ -1,19 +1,25 @@
 #pragma once
+// ----- C++ Libraries -----//
 #include <iostream>
 #include <string>
 #include <vector>
-#include "ros/ros.h"
-#include "ros/package.h"
-#include "std_msgs/Empty.h"
-#include "std_msgs/Bool.h"
-#include "std_msgs/String.h"
-#include "vision_msgs/FaceRecogSrv.h"
-#include "vision_msgs/FaceTrainSrv.h"
-#include "img_proc/Tag_with_tf.h"
-#include "geometry_msgs/Twist.h"
-#include "geometry_msgs/PointStamped.h"
-#include "geometry_msgs/PoseStamped.h"
+
+// ----- ROS Libraries ----- //
+#include <ros/ros.h>
+#include <ros/package.h>
+#include <std_msgs/Empty.h>
+#include <std_msgs/Bool.h>
+#include <std_msgs/String.h>
+#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/PoseStamped.h>
+
+// ----- Custom msgs ----- //
+#include <vision_msgs/FaceRecogSrv.h>
+#include <vision_msgs/FaceTrainSrv.h>
+#include <img_proc/Tag_with_tf.h>
 #include <img_proc/ReadQRCode.h>
+#include <vision_logistics/RunTask.h>
 
 class FestinoVision
 {
@@ -39,6 +45,9 @@ private:
     //QR detector
     static ros::ServiceClient cltQRSrv;
 
+    //Logistics camera taks
+    static ros::ServiceClient cltCameraTask;
+
 public:
     
     static bool setNodeHandle(ros::NodeHandle* _nh);
@@ -58,7 +67,12 @@ public:
     //QR detector
     static std::string enableQRDetect(bool enabled);
 
-
+    //Logistics camera task
+    static std::pair<double, double> findPlatform();
+    static float findBand();
+    static float centerBand();
+    static float findPiece();
+    static float findEndBand();
 
 private:
     //

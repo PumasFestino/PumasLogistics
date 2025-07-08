@@ -1,3 +1,7 @@
+// --------------------------------------------------------------------------------------- //
+// ----- This action put the robot in position for take or drop piece (pre-grasping) ----- //
+// --------------------------------------------------------------------------------------- //
+
 // ----- ROS Libraries ----- //
 #include <ros/ros.h>
 #include <actionlib/server/simple_action_server.h>
@@ -42,6 +46,14 @@ class PoseRobotStationAction
 
         bool aling_;
         bool success_;
+
+        //Variables for aling whit mps
+        float forward_distance_     = 0.75;
+        float platform_distance_    = 0.35;
+        float move_left_distance_   = 0.20;
+        float move_right_distance_  = 0.20;
+
+        float move_base_vel_        = 0.15;
 
     public:
         PoseRobotStationAction(std::string name):
@@ -92,7 +104,7 @@ class PoseRobotStationAction
                             FestinoNavigation::alingWithLine(true);
 
                             //Move base forward 0.75m
-                            FestinoNavigation::move_base(1, 0, 0.15, 0.75);
+                            FestinoNavigation::move_base(1, 0, move_base_vel_, forward_distance_);
 
                             //Aling again
                             FestinoNavigation::alingWithLine(true);
@@ -104,21 +116,21 @@ class PoseRobotStationAction
                             if(mps_type_ == "platform")
                             {
                                 current_state = "SM_ALING_FOR_PIECE --- Platform";
-                                FestinoNavigation::move_base(0, -1, 0.15, 0.35);
+                                FestinoNavigation::move_base(0, -1, move_base_vel_, platform_distance_);
                             }
                          
                             //Si estamos en la CS, ya sea entrada o salida que se mueva uno a la izquierda
                             else if((mps_type_ == "CS") || (mps_type_ == "BS" && mps_band_ == "output"))
                             {
                                 current_state = "SM_ALING_FOR_PIECE --- " + mps_type_ + " -> " + mps_band_;
-                                FestinoNavigation::move_base(0, 1, 0.15, 0.20);
+                                FestinoNavigation::move_base(0, 1, move_base_vel_, move_left_distance_);
                             }
                             
                             //si estamos en la BS y vamos a la entrance entonces que se mueva uno a la derecha
                             else if(mps_type_ == "BS" && mps_band_ == "entrance")
                             {
                                 current_state = "SM_ALING_FOR_PIECE --- " + mps_type_ + "-> " + mps_band_;
-                                FestinoNavigation::move_base(0, -1, 0.15, 0.20);
+                                FestinoNavigation::move_base(0, -1, move_base_vel_, move_right_distance_);
                                 
                             }
                             /*else if(tokens[1] == "RS" && tokens[4] == "output"){

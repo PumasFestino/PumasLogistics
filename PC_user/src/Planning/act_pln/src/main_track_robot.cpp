@@ -261,6 +261,7 @@ int main(int argc, char** argv){
     ros::Subscriber subLaserScan 	= n.subscribe("/scan", 1, callbackLaserScan);
     ros::Publisher pubMachineInst   = n.advertise<std_msgs::String>("/machine_instruction_msg", 1000);  // revisar con Sergio
     ros::Publisher pubManipulator   = n.advertise<std_msgs::Int32 >("manipulator/action", 1000);        // modificar por brazo de Miguel
+    ros::Publisher pubVel           = n.advertise<geometry_msgs::PoseStamped>  ("/cmd_vel", 1000);      //QUITAAAAR
 
     // Services
     ros::ServiceClient aruco_client = n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
