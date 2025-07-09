@@ -24,7 +24,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include "actionlib_msgs/GoalStatus.h"
 
-/*------------------------Action Messages---------------*/
+/*------------------------Action Library---------------*/
 #include <festino_task/navigate_to_zoneAction.h>
 
 /*------------------------Festino Tools-----------------*/
@@ -150,17 +150,7 @@ public:
 
     void updateFeedback(const std::string& current_state)
     {
-        feedback_.current_zone_index = target_index_;
         feedback_.current_state = current_state;
-        feedback_.current_position = getCurrentRobotPosition();
-        
-        if(target_index_ < target_zones_.size()){
-            feedback_.current_zone_name = target_zones_[target_index_];
-        }
-        
-        if(target_zones_.size() > 0){
-            feedback_.progress_percentage = (float)target_index_ / (float)target_zones_.size() * 100.0;
-        }
         
         as_.publishFeedback(feedback_);
     }
@@ -274,8 +264,6 @@ public:
                     
                     // Set final result
                     result_.success = true;
-                    result_.final_message = "Successfully visited all zones";
-                    result_.final_position = getCurrentRobotPosition();
                     
                     ROS_INFO("Zone navigation completed successfully");
                     as_.setSucceeded(result_);
@@ -289,8 +277,6 @@ public:
         // If we exit the loop due to failure
         if(!success){
             result_.success = false;
-            result_.final_message = "Navigation failed";
-            result_.final_position = getCurrentRobotPosition();
             as_.setAborted(result_);
         }
     }
