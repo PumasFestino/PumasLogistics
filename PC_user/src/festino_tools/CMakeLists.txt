@@ -244,6 +244,7 @@ add_library(festino_tools
   src/FestinoKnowledge.cpp
   src/FestinoVision.cpp
   src/FestinoCommunication.cpp
+  src/FestinoTask.cpp
 )
 
 add_dependencies(festino_tools ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
