@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
     ros::init(argc, argv, "camera_tasks_node");
     ros::NodeHandle nh;
 
-    ros::Subscriber sub = nh.subscribe("/manipulator_camera/color/image_raw", 1, &CameraProcessor::imageCallback, &processor);
+    ros::Subscriber sub = nh.subscribe("/realsense/color/image_raw", 1, &CameraProcessor::imageCallback, &processor);
     ros::ServiceServer srv = nh.advertiseService("/vision/run_camera_task", runTaskCallback);
 
     ros::spin();

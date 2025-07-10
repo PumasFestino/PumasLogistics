@@ -58,9 +58,13 @@ protected:
     std::string action_manip_;
     std::string action_name_;
 
-    // For finding platform
-    float move_x_center = 25.0;
-    float move_y_center = 60.0;
+    // For find platform
+    float move_x_platform = 10.0;
+    float move_y_platform = 60.0;
+
+    //For find band
+    float move_x_band = 25.0;
+    float move_y_band = 60.0;
 
     // For proportional control
     float error_x = 0.0;
@@ -114,7 +118,7 @@ public:
 
                 case SM_FIND_PLATFORM:
                     current_state = "SM_FIND_PLATFORM --- Init";
-                    FestinoHardware::move_manipulator(move_x_center, move_y_center, 0.0);
+                    FestinoHardware::move_manipulator(move_x_platform, move_y_platform, 0.0);
                     do {
                         current_state = "SM_FIND_PLATFORM --- Move manipulator";
                         std::tie(error_x, error_y) = FestinoVision::findPlatform();
@@ -125,7 +129,7 @@ public:
 
                 case SM_FIND_BAND:
                     current_state = "SM_FIND_BAND --- Init";
-                    FestinoHardware::move_manipulator(move_x_center, move_y_center, 0.0);
+                    FestinoHardware::move_manipulator(move_x_band, move_y_band, 0.0);
                     do {
                         current_state = "SM_FIND_BAND --- Move manipulator";
                         
