@@ -38,10 +38,10 @@ int cont_instructions = 0;
 enum SMState {
     SM_INIT,
 	SM_WAIT_FOR_INSTRUCTION,
-	SM_GO_TO,
+	SM_MOVE,
     SM_ALIGN,
-    SM_TAKE,
-    SM_DROP,
+    SM_RETRIEVE,
+    SM_DELIVER,
     SM_ASK,
     SM_FINAL_STATE
 };
@@ -79,32 +79,32 @@ SMState state = SM_INIT;
 // Request flag for new instructions to the planner
 bool request = false;
 // String to storage instruction tokens
-std::vector<std::string> tokens;
+std::vector<std::string> instructionTokens;
 
 // Receive instructions from the planner
 void request_instruction(){
     std::cout << "Request a new instruction" << std::endl;	
 
-    if(FestinoCommunication::getInstruction(&tokens)){
-        std::cout << "The instruction is: " <<  tokens[0] << std::endl;	
+    if(FestinoCommunication::getInstruction(&instructionTokens)){
+        std::cout << "The instruction is: " <<  instructionTokens[0] << std::endl;	
         request = true;
 
-        if(tokens[0] == "goto"){
-            state = SM_GO_TO;
+        if(instructionTokens[0] == "move"){
+            state = SM_MOVE;
             return;
         }
 
-        if(tokens[0] == "take" || tokens[0] == "takep"){
-            state = SM_TAKE;
+        if(instructionTokens[0] == "retrieve"){
+            state = SM_RETRIEVE;
             return;
         }
 
-        if(tokens[0] == "drop" || tokens[0] == "dropp"){
-            state = SM_DROP;
+        if(instructionTokens[0] == "deliver"){
+            state = SM_DELIVER;
             return;
         }
 
-        if(tokens[0] == "ask"){
+        if(instructionTokens[0] == "ask"){
             state = SM_ASK;
             return;
         }
@@ -123,18 +123,18 @@ void compute_coordinates(){
     //Signo por el que se multiplican los senos y cosenos 
     int dir_sign = 0;
     //Se convierte en angulo de string a entero
-    angulo_int = std::stoi(tokens[3]);
+    angulo_int = std::stoi(instructionTokens[3]);
     
     float angulo_pose = 0.0f;
     angulo_pose = angulo_int*(M_PI/180);
 
-    if(tokens[4] == "entrance" || tokens[4] == "platform" ){
+    if(instructionTokens[4] == "entrance" || instructionTokens[4] == "platform" ){
 	    //Si es entrada o platform tiene que mirar contrario a la orientacion del mapa
         angulo_int = angulo_int - 180;
 	    //Si es entrada o plataforma se le suman los senos y cosenos   
 	    dir_sign = 1;                    
     }
-    if(tokens[4] == "output"){
+    if(instructionTokens[4] == "output"){
 	    //Si es salida se le restan los senos y cosenos  
 	    dir_sign = -1; 
     }
@@ -154,7 +154,7 @@ void transform_zone()
     tf::StampedTransform transform;
 
     //TF related stuff 
-    std::cout << tokens[2] << std::endl;
+    std::cout << instructionTokens[2] << std::endl;
     tf_target_zone.header.frame_id = "/map";
     tf_target_zone.pose.position.x = 0.0;
     tf_target_zone.pose.position.y = 0.0;
@@ -168,8 +168,8 @@ void transform_zone()
 
     try{
         std::cout << "entró al try" << std::endl;
-        listener.waitForTransform("/map", tokens.at(2), ros::Time(0), ros::Duration(100.0));
-        listener.lookupTransform("/map", tokens.at(2), ros::Time(0), transform);
+        listener.waitForTransform("/map", instructionTokens.at(2), ros::Time(0), ros::Duration(100.0));
+        listener.lookupTransform("/map", instructionTokens.at(2), ros::Time(0), transform);
     }
     catch (tf::TransformException ex){
         ROS_ERROR("%s",ex.what());
@@ -184,7 +184,7 @@ void transform_zone()
 	tf_target_zone.pose.orientation.z = transform.getRotation().z();
 	tf_target_zone.pose.orientation.w = transform.getRotation().w();
 
-    std::cout << "salió del try name:" << tokens.at(2) << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
+    std::cout << "salió del try name:" << instructionTokens.at(2) << " tf x:" << tf_target_zone.pose.position.x << " y:" << tf_target_zone.pose.position.y << std::endl;
 }
 
 
@@ -280,7 +280,7 @@ int main(int argc, char** argv){
     std::string zone_buffer = "M_Z01";
 
     // String to save the current section 
-    std::string sec_buffer = "indef";
+    std::string section_buffer = "indef";
 
     // String to save the current station
     std::string station_buffer = "NA";
@@ -307,12 +307,12 @@ int main(int argc, char** argv){
                 }
 	    		break;
 
-	    	case SM_GO_TO:
-	    		std::cout << "State machine: SM_GO_TO" << std::endl;
+	    	case SM_MOVE:
+	    		std::cout << "State machine: SM_MOVE" << std::endl;
                 request = false;
                 
                 //Si estamos en la misma zona y queremos pasar de plataforma a entrada entonces solo muevete ahí mismo 
-                if((zone_buffer == tokens[2]) && (sec_buffer == "platform")){
+                if((zone_buffer == instructionTokens[2]) && (section_buffer == "platform")){
                     vel.linear.y = 2;
                     //Despues de alinearse con el Aruco se tiene que desplazar a la plataforma
                     for(int i=0; i<steps_to_band; i++){
@@ -323,7 +323,7 @@ int main(int argc, char** argv){
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
                 //Si se trata de la zona final hay que ir al centro de la misma
-                else if (tokens[1] == "ES"){
+                else if (instructionTokens[1] == "ES"){
                     FestinoNavigation::moveDistAngle(-move_to_machine, 0, 1000);
                     transform_zone();
                     navigate_to_location(tf_target_zone);
@@ -352,11 +352,11 @@ int main(int argc, char** argv){
                 //Variables que guardan la zona, la seccion y la estacion en la que estamos
 
                 //Zona
-                zone_buffer = tokens[2];
+                zone_buffer = instructionTokens[2];
                 //Seccion
-                sec_buffer  = tokens[4];
+                section_buffer  = instructionTokens[4];
                 //Estacion
-		        station_buffer = tokens[1];
+		        station_buffer = instructionTokens[1];
                 
 	    		break;
 
@@ -375,7 +375,7 @@ int main(int argc, char** argv){
 
                     if(aruco_srv.response.success){
 
-                         if(tokens.at(4) == "platform"){
+                         if(instruction.at(4) == "platform"){
                              //Negativo a la derecha
                              vel.linear.y = -2;
 			                 std::cout << "Publico en vel" << std::endl;
@@ -386,7 +386,7 @@ int main(int argc, char** argv){
                              }
                          }
                          //Si estamos en la CS, ya sea entrada o salida que se mueva uno a la izquierda
-                         else if((tokens[1] == "CS") || (tokens[1] == "BS" && tokens[4] == "output")){
+                         else if((instructionTokens[1] == "CS") || (instructionTokens[1] == "BS" && instructionTokens[4] == "output")){
                             //Mueve uno a la izquierda de la banda
                             //Positivo a la izquierda
                             vel.linear.y = 2;
@@ -395,7 +395,7 @@ int main(int argc, char** argv){
                             ros::Duration(1, 0).sleep();
                          }
                          //si estamos en la BS y vamos a la entrance entonces que se mueva uno a la derecha
-                         else if(tokens[1] == "BS" && tokens[4] == "entrance"){
+                         else if(instructionTokens[1] == "BS" && instructionTokens[4] == "entrance"){
                             //Mueve uno a la derecha de la banda
                             //Negativo a la derecha
                             vel.linear.y = -2;
@@ -403,7 +403,7 @@ int main(int argc, char** argv){
                             pubVel.publish(vel);
 			                ros::Duration(1, 0).sleep();
                          }
-                         /*else if(tokens[1] == "RS" && tokens[4] == "output"){
+                         /*else if(instructionTokens[1] == "RS" && instructionTokens[4] == "output"){
                             //Mueve uno a la derecha de la banda
                             //Negativo a la derecha
                             vel.linear.y = -2;
@@ -416,7 +416,7 @@ int main(int argc, char** argv){
                                                      				
 			            state = SM_WAIT_FOR_INSTRUCTION;	
 			            flag_wall = true;
-                        //state = SM_TAKE;	
+                        //state = SM_RETRIEVE;	
 			            //state = SM_FINAL_STATE;
                     }
                     else{
@@ -433,17 +433,17 @@ int main(int argc, char** argv){
 				}
                 break;
 
-			case SM_TAKE:
-	    		std::cout << "State machine: SM_TAKE" << std::endl;	
+			case SM_RETRIEVE:
+	    		std::cout << "State machine: SM_RETRIEVE" << std::endl;	
                 request = false;
 	            
-                if(tokens[0] == "takep"){
+                if(instructionTokens[0] == "takep"){
                     //Tomar de la plataforma
 		            std::cout << "Estoy enviando un 1" << std::endl;
                     manipulator_var.data = 1;
                 }
                 else{
- 		            if((station_buffer == "BS" && sec_buffer == "output") || station_buffer == "RS" || station_buffer == "CS"){
+ 		            if((station_buffer == "BS" && section_buffer == "output") || station_buffer == "RS" || station_buffer == "CS"){
                         std::cout << "Estoy enviando un 4" << std::endl;
                         //Tomar de la banda izq
                         manipulator_var.data = 4;
@@ -464,11 +464,11 @@ int main(int argc, char** argv){
 
                 state = SM_WAIT_FOR_INSTRUCTION;
 	    		break;
-			case SM_DROP:
-	    		std::cout << "State machine: SM_DROP" << std::endl;	
+			case SM_DELIVER:
+	    		std::cout << "State machine: SM_DELIVER" << std::endl;	
                 request = false;	          
 	    		
-                if(tokens[0] == "dropp"){
+                if(instructionTokens[0] == "dropp"){
                     //Dejar en la plataforma
                     std::cout << "Estoy enviando un 3" << std::endl;
                     manipulator_var.data = 3;
@@ -505,7 +505,7 @@ int main(int argc, char** argv){
                 request = false;
 
                 //Envía la concatenada la acción y el color de la base si se trata de la BS
-                machine_instruction.data = tokens[1]  + " " + tokens[2];
+                machine_instruction.data = instructionTokens[1]  + " " + instructionTokens[2];
 	    		
                 pubMachineInst.publish(machine_instruction);
                 state = SM_WAIT_FOR_INSTRUCTION;
