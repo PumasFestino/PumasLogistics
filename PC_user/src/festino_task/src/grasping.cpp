@@ -78,8 +78,8 @@ protected:
     float move_z_piece = 25.0;
 
     // For end of band alignment
-    float move_x_band = 15.0;
-    float move_y_band = 15.0;
+    float move_x_band_ = 15.0;
+    float move_y_band_ = 15.0;
 
     // Gripper control
     bool gripper_open = true;
