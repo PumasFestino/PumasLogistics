@@ -14,15 +14,16 @@ char buffer[50];
 bool handle_instruction(robot_to_main_communication::InstructionService::Request &req,
                         robot_to_main_communication::InstructionService::Response &res)
 {
+    int valread = 0;
     std::string command = req.request;
     if (command.empty())
         command = "request_instruction";
 
     // Enviar al servidor TCP
-    write(client_fd, command.c_str(), command.length());
+    write(client_fd, "n", 1);
 
     // Leer respuesta del servidor
-    int valread = read(client_fd, buffer, sizeof(buffer));
+    valread = read(client_fd, buffer, sizeof(buffer));
     if (valread > 0) {
         buffer[valread] = '\0';
         res.instruction = std::string(buffer);
