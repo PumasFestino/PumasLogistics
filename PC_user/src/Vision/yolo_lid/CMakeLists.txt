@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(yolo_detect)
+project(yolo_lid)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -30,5 +30,6 @@ include_directories(
 
 catkin_install_python(PROGRAMS
   scripts/yolo_detect_node.py
+  scripts/centroid_to_3d.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
