@@ -375,7 +375,7 @@ int main(int argc, char** argv){
 
                     if(aruco_srv.response.success){
 
-                         if(instruction.at(4) == "platform"){
+                         if(instructionTokens.at(4) == "platform"){
                              //Negativo a la derecha
                              vel.linear.y = -2;
 			                 std::cout << "Publico en vel" << std::endl;
