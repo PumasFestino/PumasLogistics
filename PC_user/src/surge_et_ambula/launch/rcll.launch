@@ -2,8 +2,8 @@
     <!--   Vision   -->
     <include file="$(find freenect_launch)/launch/freenect.launch" />
     <node name="move_kinect" pkg="kinect_move" type="move_kinect.py" output="screen" />
-    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
-        <param name="camera" value="realsense">
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch"> 
+        <param name="/camera" type="string" value="realsense"/>
     </include>
     <include file="$(find yolo_lid)/launch/yolo_detect.launch" />
     <node name="aruco_tf_srv" pkg="img_proc" type="aruco_tf_srv" output="screen" />
