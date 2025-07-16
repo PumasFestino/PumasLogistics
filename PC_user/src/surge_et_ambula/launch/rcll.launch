@@ -1,13 +1,27 @@
 <launch>
+    <!--   Vision   -->
     <include file="$(find freenect_launch)/launch/freenect.launch" />
+    <node name="move_kinect" pkg="kinect_move" type="move_kinect.py" output="screen" />
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <param name="camera" value="realsense">
+    </include>
+    <include file="$(find yolo_lid)/launch/yolo_detect.launch" />
+    <node name="aruco_tf_srv" pkg="img_proc" type="aruco_tf_srv" output="screen" />
 
+    <!--   Communication   -->
+    <include file="$(find robot_to_main_communication)/launch/robot_to_main_communication.launch" />
+    <node name="refbox_comm_node" pkg="ref_box_comm" type="refbox_comm_node" output="screen"/>
+
+    <!--   Move   -->
     <node name="move_base" pkg="simple_move" type="move_base" output="screen" />
     <node name="aling_with_line" pkg="simple_move" type="aling_with_line" output="screen" />
-    <node name="aruco_tf_srv" pkg="img_proc" type="aruco_tf_srv" output="screen" />
+
+    <!--   Festino tasks   -->
+    <node name="grasping" pkg="festino_task" type="grasping" output="screen" />
+    <node name="navigate_to_zone" pkg="festino_task" type="navigate_to_zone" output="screen" />
+    <node name="pose_robot_piece" pkg="festino_task" type="pose_robot_piece" output="screen" />
+    <node name="pose_robot_station" pkg="festino_task" type="pose_robot_station" output="screen" />
     
-    <!--include file="$(find robot_to_main_communication)/launch/robot_to_main_communication.launch" /-->
-    <node name="move_kinect" pkg="kinect_move" type="move_kinect.py" output="screen"/>
-    <!--node name="robot_to_main" pkg="refbox_com"-->
-    
+    <!--   Rviz   -->
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation_JM.rviz"/>
 </launch>
