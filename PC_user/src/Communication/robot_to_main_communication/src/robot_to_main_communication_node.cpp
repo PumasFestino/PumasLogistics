@@ -19,6 +19,11 @@ char buffer[50];
 // Variables globales para almacenamiento de zonas
 std::vector<std::string> zone_queue;
 std::vector<std::string> tokens;
+
+// Instrucciones para probar
+std::vector<std::string> demo_instructions = ["move CS C_Z22 45","move BS M_Z11 0","move RS CS_Z34 90"];
+int instruction_index = 0;
+
 size_t current_zone_index = 0;
 
 // Callback para recibir las zonas desde /pub_zone
@@ -38,16 +43,25 @@ void zoneCallback(const std_msgs::String::ConstPtr& msg)
 bool handle_instruction(robot_to_main_communication::InstructionService::Request &req,
 robot_to_main_communication::InstructionService::Response &res)
 {
-    int valread = 0;
+   /* int valread = 0;
     std::stringstream ss;
 
     write(client_fd, "n", 1);
     valread = read(client_fd, buffer, sizeof(buffer));
 
     ss << buffer;
+
     res.instruction = ss.str();
 
     memset(&buffer, 0, sizeof(buffer));         // Limpia el buffer
+    return true;*/
+    res.instruction = demo_instructions[instruction_index].str();
+    instruction_index++;
+
+    if (instruction_index == 3){
+        instruction_index = 0;
+    }
+
     return true;
 }
 
