@@ -1,5 +1,5 @@
 <launch>
-    <arg name="model_path" default="$(find yolo_lid)/models/best.pt" />
+    <arg name="model_path" default="$(find yolo_lid)/models/nuevito.pt" />
 
     <node name="yolo_category"
       pkg="yolo_lid"
