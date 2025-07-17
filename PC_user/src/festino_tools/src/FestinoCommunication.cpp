@@ -22,14 +22,13 @@ bool FestinoCommunication::setNodeHandle(ros::NodeHandle* nh)
 bool FestinoCommunication::getInstruction(std::vector<std::string>* tokens)
 {
     robot_to_main_communication::InstructionService srv;
-    srv.request.request = "request_instruction";
-    std::vector<std::string> Tokens = *tokens;
+    srv.request.request = "true";
 
     if(instruction_client.call(srv)){
-        Tokens.clear();
-        boost::algorithm::split(Tokens, srv.response.instruction, boost::algorithm::is_any_of(" "));
+        tokens->clear();
+        boost::algorithm::split(*tokens, srv.response.instruction, boost::is_any_of(" "), boost::token_compress_on);
         return true;
-    }else{
+    } else {
         ROS_ERROR("FestinoCommunication.->Failed to call /instruction_msg");
         return false;
     }

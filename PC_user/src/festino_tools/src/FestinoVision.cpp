@@ -160,19 +160,28 @@ void FestinoVision::callbackCentroid(const geometry_msgs::Point::ConstPtr& msg)
 {
     _centroid_x = msg -> x;
     _centroid_y = msg -> y;
+    //_tag_id = msg -> z;
 }
 
  
 std::pair<double, double> FestinoVision::find(std::string thing)
 {
-   return std::make_pair(_centroid_x, _centroid_y); 
+    if (thing == "piece"){
+        return std::make_pair(_centroid_x, _centroid_y); 
+    }
+    else if (thing == "platform"){
+        return std::make_pair(_centroid_x, _centroid_y); 
+    }
+    else if (thing == "band"){
+        return std::make_pair(_centroid_x, _centroid_y); 
+    }
 }
 
 float FestinoVision::findBand()
 {
     std::cout<< "FestinoVision.-> Find Band" << std::endl;
     vision_logistics::RunTask srv;
-    srv.request.task_name = "find_conveyor";
+   srv.request.task_name = "find_conveyor";
     if(cltCameraTask.call(srv))
     {
         std::cout << "Success: " << srv.response.success << std:: endl;

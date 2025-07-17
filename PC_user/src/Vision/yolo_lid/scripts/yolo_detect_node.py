@@ -3,6 +3,7 @@
 import rospy
 from sensor_msgs.msg import Image
 from yolo_detect.msg import StringArray
+from yolo_detect.msg import PointArray
 import logging
 from cv_bridge import CvBridge
 import cv2
@@ -47,22 +48,21 @@ class YoloCategoryNode:
         # print(results.boxes)
         if len(all_boxes) > 0:
             # Encontrar la persona con el bounding box más grande
-            areas = (all_boxes[:, 2] - all_boxes[:, 0]) * (all_boxes[:, 3] - all_boxes[:, 1])
-            selected_idx = areas.argmax()
+            # areas = (all_boxes[:, 2] - all_boxes[:, 0]) * (all_boxes[:, 3] - all_boxes[:, 1])
+            # selected_idx = areas.argmax()
             
             # Obtener el bounding box y keypoints seleccionados
-            selected_box = all_boxes[selected_idx]
+            # selected_box = all_boxes[selected_idx]
+            
+            point_array_msg = PointArray()
+            for i in range(len(all_boxes)):
+                p = Point()
+                p.x = float((all_boxes[i][0] + all_boxes[i][2]) / 2)
+                p.y = float((all_boxes[i][1] + all_boxes[i][3]) / 2)
+                p.z = int(all_boxes[i][5])  # Clase detectada
+                point_array_msg.points.append(p)
 
-            # Calcular y publicar centroide
-            centroid_x = (selected_box[0] + selected_box[2]) / 2
-            centroid_y = (selected_box[1] + selected_box[3]) / 2
-            
-            centroid_msg = Point()
-            centroid_msg.x = float(centroid_x)
-            centroid_msg.y = float(centroid_y)
-            centroid_msg.z = int(selected_box[-1]) # nombre de la clase
-            
-            self.centroid_pub.publish(centroid_msg)
+            self.centroid_pub.publish(point_array_msg)
 
 if __name__ == '__main__':
     rospy.init_node('yolo_lid_node')
