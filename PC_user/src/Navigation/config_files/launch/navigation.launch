@@ -1,6 +1,6 @@
 <launch>  
-  <arg name="static_map_file"  default="$(find config_files)/maps/Logistics2024_clean.yaml"/>
-  <arg name="prohibition_map_file"  default="$(find config_files)/prohibition_maps/Logistics2024_pro.yaml"/>
+  <arg name="static_map_file"  default="$(find config_files)/maps/logistics-2025.yaml"/>
+  <arg name="prohibition_map_file"  default="$(find config_files)/prohibition_maps/logistics-2025-blocked.yaml"/>
   <arg name="initial_pose_x" default="2.529"/>
   <arg name="initial_pose_y" default="-0.122"/>
   <arg name="initial_pose_a" default="0.0"/>

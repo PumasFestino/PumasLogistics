@@ -16,6 +16,9 @@
     <node name="move_base" pkg="simple_move" type="move_base" output="screen" />
     <node name="aling_with_line" pkg="simple_move" type="aling_with_line" output="screen" />
 
+    <!--   Challenges   -->
+    <node name="move_base" pkg="simple_move" type="move_base" output="screen" />
+
     <!--   Festino tasks   -->
     <node name="grasping" pkg="festino_task" type="grasping" output="screen" />
     <node name="navigate_to_zone" pkg="festino_task" type="navigate_to_zone" output="screen" />
