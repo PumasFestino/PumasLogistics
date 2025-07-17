@@ -18,26 +18,26 @@
 
 enum SMState
 {
-    SM_INIT,                // Initial state.
-    
-    // ---- BAND/PLATFORM DETECTION ----
-    SM_FIND_PLATFORM,       // Moves manipulator forward to locate the platform.
-    SM_FIND_BAND,           // Scans to detect the conveyor band's position.
-    SM_ALIGN_WITH_BAND,     // Centers the manipulator over the band.
+    SM_INIT,
+    SM_MOVE_TO_PLATFORM,
+    SM_NOT_MOVE_TO_PLATFORM,
 
-    // ---- PIECE HANDLING ----
-    SM_FIND_PIECE,          // Identifies the target piece.
-    SM_FIND_END_BAND,       // Detects the end of the band to avoid out-of-bounds errors.
-    SM_ALIGN_WITH_PIECE,    // Positions manipulator directly above the piece.
+    SM_FIND_PLATFORM,
+    SM_ALIGN_WITH_PLATFORM,
 
-    // ---- GRIPPER ACTIONS ----
-    SM_DOWN_GRIPPER,        // Lowers the manipulator to picking/dropping height.
-    SM_GRIPPER_ACTION,      // Opens or closes gripper to grasp the piece.
-    SM_UP_GRIPPER,          // Lifts the manipulator after picking/dropping.
+    SM_FIND_PIECE,
+    SM_ALIGN_WITH_PIECE,
 
-    // ---- FINALIZATION ----
-    SM_GO_HOME,             // Returns manipulator to home position.
-    SM_FINISH               // End of cycle.
+    SM_FIND_END_BAND,
+    SM_ALIGN_WITH_END_BAND,
+
+    SM_PLACE_OVER_PIECE,
+    SM_DOWN_GRIPPER,
+    SM_GRIPPER_ACTION,
+    SM_UP_GRIPPER,
+
+    SM_GO_HOME,
+    SM_FINISH
 };
 
 class GraspingAction
@@ -52,37 +52,42 @@ protected:
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener tf_listener_;
 
-    bool success_;
-
     SMState state_;
-    std::string action_manip_;
+    bool success_;
+    bool gripper_status = true;
+
     std::string action_name_;
+    std::string action_manip_;
 
-    // For find platform
-    float move_x_platform = 10.0;
-    float move_y_platform = 60.0;
-
-    //For find band
-    float move_x_band = 25.0;
-    float move_y_band = 60.0;
-
-    // For proportional control
-    float error_x = 0.0;
-    float error_y = 0.0;
-    float threshold = 100;
-    float threshold_1 = 50;
+    // Initial manipulator positioning
+    float move_x_out = 5.0;
+    float move_y_out = 60.0;
 
     // For aligning with the piece
-    float move_x_piece = 15.0;
-    float move_y_piece = 15.0;
-    float move_z_piece = 25.0;
+    float move_x_piece = 35.0;
+    float move_y_piece = 55.0;
+    float move_z_piece = 85.0;
 
-    // For end of band alignment
-    float move_x_band_ = 15.0;
-    float move_y_band_ = 15.0;
+    // Proportional control
+    float error_x = 0.0;
+    float error_y = 0.0;
 
-    // Gripper control
-    bool gripper_open = true;
+    // Vision centering
+    float centroid_x = 0.0;
+    float centroid_y = 0.0;
+    const int target_x = 640;
+    const int target_y = 360;
+    const float tolerance = 0.05f;
+    const int min_x = target_x - static_cast<int>(target_x * tolerance);
+    const int max_x = target_x + static_cast<int>(target_x * tolerance);
+    const int min_y = target_y - static_cast<int>(target_y * tolerance);
+    const int max_y = target_y + static_cast<int>(target_y * tolerance);
+
+    // Instructions
+    std::string take   = "take";
+    std::string takep  = "takep";
+    std::string drop   = "drop";
+    std::string dropp  = "dropp";
 
 public:
     GraspingAction(std::string name)
@@ -95,7 +100,6 @@ public:
         FestinoNavigation::setNodeHandle(&nh_);
         FestinoVision::setNodeHandle(&nh_);
         FestinoHardware::setNodeHandle(&nh_);
-
         as_.start();
         ROS_INFO("ACTION SERVER [%s] started.", action_name_.c_str());
     }
@@ -103,7 +107,6 @@ public:
     void executeCB(const festino_task::graspingGoalConstPtr &goal)
     {
         action_manip_ = goal->action_manip;
-
         ros::Rate rate(10);
         std::string current_state = "";
 
@@ -113,94 +116,134 @@ public:
             {
                 case SM_INIT:
                     current_state = "SM_INIT";
-                    state_ = (action_manip_ == "takep" || action_manip_ == "dropp") ? SM_FIND_PLATFORM : SM_FIND_BAND;
+                    state_ = (action_manip_ == "takep" || action_manip_ == "dropp") ? SM_MOVE_TO_PLATFORM : SM_NOT_MOVE_TO_PLATFORM;
+                    break;
+
+                case SM_MOVE_TO_PLATFORM:
+                    current_state = "SM_MOVE_TO_PLATFORM --- Init";
+                    FestinoNavigation::move_base(0, -1, 0.1, 0.15);
+                    FestinoHardware::move_manipulator(move_x_out, move_y_out, 0.0);
+                    state_ = SM_FIND_PLATFORM;
                     break;
 
                 case SM_FIND_PLATFORM:
                     current_state = "SM_FIND_PLATFORM --- Init";
-                    FestinoHardware::move_manipulator(move_x_platform, move_y_platform, 0.0);
-                    do {
-                        current_state = "SM_FIND_PLATFORM --- Move manipulator";
-                        std::tie(error_x, error_y) = FestinoVision::findPlatform();
+                    std::tie(centroid_x, centroid_y) = FestinoVision::find("platform");
+                    std::cout << "FestinoGrasping -> centroid x: " << centroid_x << "; centroid_y: " << centroid_y << std::endl;
+                    state_ = (action_manip_ == "takep") ? SM_FIND_PIECE : SM_ALIGN_WITH_PLATFORM;
+                    break;
+
+                case SM_ALIGN_WITH_PLATFORM:
+                    current_state = "SM_ALIGN_WITH_PLATFORM --- Centering";
+                    if (centroid_x >= min_x && centroid_x <= max_x && centroid_y >= min_y && centroid_y <= max_y)
+                    {
+                        std::cout << "FestinoGrasping -> Centered done" << std::endl;
+                        ros::Duration(0.7).sleep();
+                        state_ = SM_PLACE_OVER_PIECE;
+                    }
+                    else
+                    {
+                        error_x = 0.15f * (centroid_x - target_x);
+                        error_y = 0.15f * (target_y - centroid_y);
+                        std::cout << "FestinoGrasping -> error x: " << error_x << "; error_y: " << error_y << std::endl;
                         FestinoHardware::move_manipulator(error_x, error_y, 0.0);
-                    } while (error_y < threshold);
-                    state_ = SM_FIND_PIECE;
+                        ros::Duration(0.7).sleep();
+                        state_ = SM_FIND_PLATFORM;
+                    }
                     break;
 
-                case SM_FIND_BAND:
-                    current_state = "SM_FIND_BAND --- Init";
-                    FestinoHardware::move_manipulator(move_x_band, move_y_band, 0.0);
-                    do {
-                        current_state = "SM_FIND_BAND --- Move manipulator";
-                        
-                        error_x = FestinoVision::findBand();
-                        std::cout << "Holiiis:" << error_x <<std::endl;
-                        FestinoHardware::move_manipulator(-error_x*0.1, 0.0, 0.0);
-                        ros::Duration(0.3).sleep();
-                    } while (abs(error_x) > threshold);
-                    state_ = SM_ALIGN_WITH_BAND;
-                    break;
-
-                case SM_ALIGN_WITH_BAND:
-                    current_state = "SM_ALIGN_WITH_BAND --- Centering";
-                    do {
-                        error_y = FestinoVision::centerBand();
-                        FestinoHardware::move_manipulator(0.0, error_y*0.1, 0.0);
-                        ros::Duration(0.3).sleep();
-                        
-                    } while (abs(error_x) > threshold_1);
-                    state_ = (action_manip_ == "drop") ? SM_FIND_END_BAND : SM_FIND_PIECE;
+                case SM_NOT_MOVE_TO_PLATFORM:
+                    current_state = "SM_NOT_MOVE_TO_PLATFORM --- Init";  
+                    FestinoHardware::move_manipulator(move_x_out, move_y_out, 0.0);
+                    ros::Duration(0.7).sleep();
+                    state_ = (action_manip_ == "take") ? SM_FIND_PIECE : SM_FIND_END_BAND;
                     break;
 
                 case SM_FIND_PIECE:
-                    current_state = "SM_FIND_PIECE --- Locating";
-                    do {
-                        error_y = FestinoVision::findPiece();
-                        FestinoHardware::move_manipulator(0.0, error_y*0.1, 0.0);
-                        ros::Duration(0.3).sleep();
-                    } while (abs(error_y) > threshold_1);
+                    current_state = "SM_FIND_PIECE --- Init";    
+                    std::tie(centroid_x, centroid_y) = FestinoVision::find("piece");
+                    std::cout << "FestinoGrasping -> centroid x: " << centroid_x << "; centroid_y: " << centroid_y << std::endl;
                     state_ = SM_ALIGN_WITH_PIECE;
+                    break;
+
+                case SM_ALIGN_WITH_PIECE:
+                    current_state = "SM_ALIGN_WITH_PIECE --- Centering";
+                    if (centroid_x >= min_x && centroid_x <= max_x && centroid_y >= min_y && centroid_y <= max_y)
+                    {
+                        std::cout << "FestinoGrasping -> Centered done" << std::endl;
+                        ros::Duration(0.7).sleep();
+                        state_ = SM_PLACE_OVER_PIECE;
+                    }
+                    else
+                    {
+                        error_x = 0.15f * (centroid_x - target_x);
+                        error_y = 0.15f * (target_y - centroid_y);
+                        std::cout << "FestinoGrasping -> error x: " << error_x << "; error_y: " << error_y << std::endl;
+                        FestinoHardware::move_manipulator(error_x, error_y, 0.0);
+                        ros::Duration(0.7).sleep();
+                        state_ = SM_FIND_PIECE;
+                    }
                     break;
 
                 case SM_FIND_END_BAND:
                     current_state = "SM_FIND_END_BAND --- Searching";
-                    do {
-                        error_y = FestinoVision::findEndBand();
-                        FestinoHardware::move_manipulator(0.0, error_y*0.1, 0.0);
-                        ros::Duration(0.3).sleep();
-                    } while (abs(error_y) > threshold);
-                    FestinoHardware::move_manipulator(move_x_band, move_y_band, 0.0);
-                    state_ = SM_DOWN_GRIPPER;
+                    std::tie(centroid_x, centroid_y) = FestinoVision::find("band");
+                    std::cout << "FestinoGrasping -> centroid x: " << centroid_x << "; centroid_y: " << centroid_y << std::endl;
+                    state_ = SM_ALIGN_WITH_END_BAND;
                     break;
 
-                case SM_ALIGN_WITH_PIECE:
-                    current_state = "SM_ALIGN_WITH_PIECE --- Aligning";
+                case SM_ALIGN_WITH_END_BAND:
+                    current_state = "SM_ALIGN_WITH_END_BAND --- Centering";
+                    if (centroid_x >= min_x && centroid_x <= max_x && centroid_y >= min_y && centroid_y <= max_y)
+                    {
+                        std::cout << "FestinoGrasping -> Centered done" << std::endl;
+                        ros::Duration(0.7).sleep();
+                        state_ = SM_PLACE_OVER_PIECE;
+                    }
+                    else
+                    {
+                        error_x = 0.15f * (centroid_x - target_x);
+                        error_y = 0.15f * (target_y - centroid_y);
+                        std::cout << "FestinoGrasping -> error x: " << error_x << "; error_y: " << error_y << std::endl;
+                        FestinoHardware::move_manipulator(error_x, error_y, 0.0);
+                        ros::Duration(0.7).sleep();
+                        state_ = SM_FIND_END_BAND;
+                    }
+                    break;
+
+                case SM_PLACE_OVER_PIECE:
+                    current_state = "SM_PLACE_OVER_PIECE --- Aligning";
                     FestinoHardware::move_manipulator(move_x_piece, move_y_piece, 0.0);
+                    ros::Duration(0.7).sleep();
                     state_ = SM_DOWN_GRIPPER;
                     break;
 
                 case SM_DOWN_GRIPPER:
                     current_state = "SM_DOWN_GRIPPER --- Lowering";
                     FestinoHardware::move_manipulator(0.0, 0.0, move_z_piece);
+                    ros::Duration(0.7).sleep();
                     state_ = SM_GRIPPER_ACTION;
                     break;
 
                 case SM_GRIPPER_ACTION:
                     current_state = std::string("SM_GRIPPER_ACTION --- ") +
                         ((action_manip_ == "take" || action_manip_ == "takep") ? "close" : "open");
-                    FestinoHardware::move_gripper((action_manip_ == "take" || action_manip_ == "takep") ? gripper_open : !gripper_open);
+                    FestinoHardware::move_gripper((action_manip_ == "take" || action_manip_ == "takep") ? gripper_status : !gripper_status);
+                    ros::Duration(1.0).sleep();
                     state_ = SM_UP_GRIPPER;
                     break;
 
                 case SM_UP_GRIPPER:
                     current_state = "SM_UP_GRIPPER --- Lifting";
                     FestinoHardware::move_manipulator(0.0, 0.0, -move_z_piece);
+                    ros::Duration(0.7).sleep();
                     state_ = SM_GO_HOME;
                     break;
 
                 case SM_GO_HOME:
                     current_state = "SM_GO_HOME --- Returning home";
                     FestinoHardware::move_manipulator_home(true);
+                    ros::Duration(0.7).sleep();
                     state_ = SM_FINISH;
                     break;
 

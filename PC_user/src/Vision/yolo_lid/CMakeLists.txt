@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  geometry_msgs
   sensor_msgs
   message_generation
   cv_bridge
@@ -13,15 +14,17 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   StringArray.msg
+  PointArray.msg
 )
 
 generate_messages(
   DEPENDENCIES
   std_msgs
+  geometry_msgs
 )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs message_runtime cv_bridge
+  CATKIN_DEPENDS roscpp rospy std_msgs geometry_msgs sensor_msgs message_runtime cv_bridge
 )
 
 include_directories(

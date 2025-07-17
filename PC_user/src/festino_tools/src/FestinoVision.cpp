@@ -19,6 +19,9 @@ ros::ServiceClient FestinoVision::cltQRSrv;
 
 //Logistics Vision Tasks
 ros::ServiceClient FestinoVision::cltCameraTask;
+ros::Subscriber FestinoVision::subCentroidPiece;
+float FestinoVision::_centroid_x;
+float FestinoVision::_centroid_y;
 
 ros::NodeHandle* FestinoVision::nh = nullptr;
 
@@ -47,7 +50,9 @@ bool FestinoVision::setNodeHandle(ros::NodeHandle* _nh)
     cltQRSrv        =   nh -> serviceClient<img_proc::ReadQRCode>("/vision/read_qr_code");
 
     //Logistics camera tasks
-    cltCameraTask   =   nh -> serviceClient<vision_logistics::RunTask>("/vision/run_camera_task");
+    cltCameraTask    =   nh -> serviceClient<vision_logistics::RunTask>("/vision/run_camera_task");
+    subCentroidPiece =   nh -> subscribe("/vision/lid_centroid", 1, &FestinoVision::callbackCentroid);
+
 
     //Pose Estimation controls
     nh  ->  setParam("/pose_2d_enabled", true);
@@ -151,25 +156,32 @@ std::string FestinoVision::enableQRDetect(bool enabled)
     return srv.response.qr_data;
 }
 
- //Logistics camera task
-std::pair<double, double> FestinoVision::findPlatform()
+void FestinoVision::callbackCentroid(const geometry_msgs::Point::ConstPtr& msg)
 {
-    std::cout<< "FestinoVision.-> Find Platform" << std::endl;
-    vision_logistics::RunTask srv;
-    srv.request.task_name = "find_aluminum";
-    if(cltCameraTask.call(srv))
-    {
-        std::cout << "Success: " << srv.response.success << std:: endl;
+    _centroid_x = msg -> x;
+    _centroid_y = msg -> y;
+    //_tag_id = msg -> z;
+}
+
+ 
+std::pair<double, double> FestinoVision::find(std::string thing)
+{
+    if (thing == "piece"){
+        return std::make_pair(_centroid_x, _centroid_y); 
     }
-    return std::make_pair(srv.response.error_x, srv.response.error_y);
-    
+    else if (thing == "platform"){
+        return std::make_pair(_centroid_x, _centroid_y); 
+    }
+    else if (thing == "band"){
+        return std::make_pair(_centroid_x, _centroid_y); 
+    }
 }
 
 float FestinoVision::findBand()
 {
     std::cout<< "FestinoVision.-> Find Band" << std::endl;
     vision_logistics::RunTask srv;
-    srv.request.task_name = "find_conveyor";
+   srv.request.task_name = "find_conveyor";
     if(cltCameraTask.call(srv))
     {
         std::cout << "Success: " << srv.response.success << std:: endl;
@@ -188,19 +200,6 @@ float FestinoVision::centerBand()
         std::cout << "Success: " << srv.response.success << std:: endl;
     }
     return srv.response.error_x;
-    
-}
-
-float FestinoVision::findPiece()
-{
-    std::cout<< "FestinoVision.-> Find Piece" << std::endl;
-    vision_logistics::RunTask srv;
-    srv.request.task_name = "find_piece";
-    if(cltCameraTask.call(srv))
-    {
-        std::cout << "Success: " << srv.response.success << std:: endl;
-    }
-    return srv.response.error_y;
     
 }
 

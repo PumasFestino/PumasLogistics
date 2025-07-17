@@ -48,6 +48,13 @@ private:
     //Logistics camera taks
     static ros::ServiceClient cltCameraTask;
 
+    static ros::Subscriber subCentroidPiece;
+    static geometry_msgs::Point _centroidPiece;
+
+    static float _centroid_x;
+    static float _centroid_y;
+
+
 public:
     
     static bool setNodeHandle(ros::NodeHandle* _nh);
@@ -68,10 +75,11 @@ public:
     static std::string enableQRDetect(bool enabled);
 
     //Logistics camera task
-    static std::pair<double, double> findPlatform();
+    static void callbackCentroid(const geometry_msgs::Point::ConstPtr& msg);
+    static std::pair<double, double> find(std::string thing);
     static float findBand();
     static float centerBand();
-    static float findPiece();
+
     static float findEndBand();
 
 private:

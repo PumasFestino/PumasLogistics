@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   refbox_protobuf_msgs
   tf
+  festino_tools
 )
 
 

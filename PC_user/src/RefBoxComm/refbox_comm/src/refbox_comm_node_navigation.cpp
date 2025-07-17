@@ -38,6 +38,8 @@
 #include "geometry_msgs/PoseStamped.h"
 #include <tf/transform_listener.h>
 
+// Festino_tools
+#include "festino_tools/FestinoCommunication.h"
 
 //----------------------------------NAVIGATION CHALLENGE
 //Biblioteca para tokenizar
@@ -56,7 +58,7 @@
 #include <thread>
 
 //#define HOST "localhost"
-#define HOST "192.168.0.101"
+#define HOST "192.168.0.255"
 #define TEAM_COLOR "MAGENTA"
 #define TEAM_NAME "Pumas"
 #define ROBOT_NAME "Festino"
@@ -729,28 +731,29 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
                     ROS_INFO_STREAM(""<< navigation_routes->ShortDebugString());
 
                     
-//navigation_routes->routes_size
-                                        //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(0));
+                    //navigation_routes->routes_size
+                    //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(0));
 
-string my_msg = "";
-for(int i = 0; i < navigation_routes->routes().Get(0).route_size(); i++){
-   // ROS_INFO_STREAM("UNA ZONA " << i);
-    //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
-    my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
-}
+                    string my_msg = "";
+                    for(int i = 0; i < navigation_routes->routes().Get(0).route_size(); i++){
+                        // ROS_INFO_STREAM("UNA ZONA " << i);
+                        //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
+                        my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
+                    }
 
 
-       std_msgs::String el_msg;
+                    std_msgs::String el_msg;
    
-       //std::stringstream ss;
-       //ss << my_msg << count;
-       el_msg.data = my_msg;//ss.str();
+                    //std::stringstream ss;
+                    //ss << my_msg << count;
+                    el_msg.data = my_msg;//ss.str();
    
 
-ROS_INFO_STREAM(" el mensaje :O " << el_msg.data);
-pub_zone.publish(el_msg);
-  /*                                      const char* ch = navigation_routes->ShortDebugString().c_str();
-                                        string s = ch;
+                    ROS_INFO_STREAM(" el mensaje :O " << el_msg.data);
+                    pub_zone.publish(el_msg);
+
+/*                  const char* ch = navigation_routes->ShortDebugString().c_str();
+                    string s = ch;
                     ROS_INFO_STREAM("------2 NAVIGATION CHALLENGE / RouteASSTRING--------- " << ch << " str " << s);
                     std::vector<std::string> tokens;
                     boost::algorithm::split(tokens, s, boost::algorithm::is_any_of(" "));
@@ -1391,6 +1394,7 @@ int main(int argc, char** argv)
 
     ros::init(argc, argv, "refbox_comm_node_navigation");
     ros::NodeHandle n;
+    FestinoCommunication::setNodeHandle(&n);
 
         //Handler p(HOST, SENDPORT, RECVPORT);
         //Handler p(HOST, RECVPORT, RECVPORT);
@@ -1412,10 +1416,18 @@ int main(int argc, char** argv)
 //---------------------------------------NAVIGATION CHALLENGE
  pub_zone = n.advertise<std_msgs::String>("/zone_msg", 1000);
  //---------------------------------------NAVIGATION CHALLENGE
-    Handler p(HOST, PUBLIC_PORT);
+    Handler p(HOST, MAGENTA_PORT);
 
     ros::Rate r(10);
     while (ros::ok()) {
+
+        std::vector<std::string> tokens;
+        if (FestinoCommunication::getInstruction(&tokens)) {
+            if (!tokens.empty()) {
+                std::string current_zone = tokens[0];
+                ROS_INFO_STREAM("Siguiente zona: " << current_zone);
+            }
+        }
 
         //Obtaining robot location
 	geometry_msgs::PoseStamped tf_robot_pose;
