@@ -5,7 +5,7 @@
       pkg="yolo_lid"
       type="yolo_detect_node.py"
       output="screen">
-    <param name="model_path" value="$(arg model_path)" />
-</node>
+        <param name="model_path" value="$(arg model_path)" />
+    </node>
 
 </launch>
