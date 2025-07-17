@@ -27,7 +27,7 @@ bool FestinoCommunication::getInstruction(std::vector<std::string>* tokens)
     srv.request.request = "instruction";
 
     if(instruction_client.call(srv)){
-        tokens->clear();
+        tokens->assign({"","","","",""});
         boost::algorithm::split(*tokens, srv.response.instruction, boost::is_any_of(" "), boost::token_compress_on);
         return true;
     } else {
