@@ -76,7 +76,7 @@ public:
 
     //Logistics camera task
     static void callbackCentroid(const geometry_msgs::Point::ConstPtr& msg);
-    static std::pair<double, double> findPiece();
+    static std::pair<double, double> find(std::string thing);
     static float findBand();
     static float centerBand();
 
