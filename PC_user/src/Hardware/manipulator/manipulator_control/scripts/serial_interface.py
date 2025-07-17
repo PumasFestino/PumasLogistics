@@ -51,18 +51,34 @@ class SerialInterface:
 
     def read_serial(self):
         while not rospy.is_shutdown():
-            if self.ser.in_waiting:
-                line = self.ser.readline().decode().strip()
-                if line:
-                    rospy.loginfo(f"ESP32: {line}")
-                    if "ok" in line.lower():
-                        self.waiting_ok = False
+            try:
+                if self.ser.in_waiting:
+                    try:
+                        raw_line = self.ser.readline()
+                        line = raw_line.decode(errors='replace').strip()  # reemplaza caracteres inválidos
+                    except Exception as e:
+                        rospy.logwarn(f"Error al leer o decodificar línea serial: {e}")
+                        continue  # Saltamos esta vuelta del loop
+                    
+                    if line:
+                        rospy.loginfo(f"ESP32: {line}")
+                        if "ok" in line.lower():
+                            self.waiting_ok = False
+    
+                if not self.waiting_ok and self.command_queue:
+                    next_command = self.command_queue.pop(0)
+                    try:
+                        self.ser.write(next_command.encode())
+                        rospy.loginfo(f"Enviado: {next_command.strip()}")
+                        self.waiting_ok = True
+                    except Exception as e:
+                        rospy.logwarn(f"Error al escribir al puerto serial: {e}")
+                        # Si se cae aquí, podemos reinsertar el comando si quieres:
+                        # self.command_queue.insert(0, next_command)
+            except Exception as e:
+                rospy.logerr(f"Fallo inesperado en read_serial(): {e}")
+                rospy.sleep(1.0)  # Esperamos un poco para no saturar el log
 
-            if not self.waiting_ok and self.command_queue:
-                next_command = self.command_queue.pop(0)
-                self.ser.write(next_command.encode())
-                rospy.loginfo(f"Enviado: {next_command.strip()}")
-                self.waiting_ok = True
 
 if __name__ == '__main__':
     rospy.init_node('serial_interface_node')

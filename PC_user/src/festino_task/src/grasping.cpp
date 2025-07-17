@@ -143,7 +143,7 @@ public:
                     }
                     else
                     {
-                        error_x = 0.15f * (centroid_x - target_x);
+                        error_x = -0.15f * (centroid_x - target_x);
                         error_y = 0.15f * (target_y - centroid_y);
                         std::cout << "FestinoGrasping -> error x: " << error_x << "; error_y: " << error_y << std::endl;
                         FestinoHardware::move_manipulator(error_x, error_y, 0.0);
@@ -176,7 +176,7 @@ public:
                     }
                     else
                     {
-                        error_x = 0.15f * (centroid_x - target_x);
+                        error_x = -0.15f * (centroid_x - target_x);
                         error_y = 0.15f * (target_y - centroid_y);
                         std::cout << "FestinoGrasping -> error x: " << error_x << "; error_y: " << error_y << std::endl;
                         FestinoHardware::move_manipulator(error_x, error_y, 0.0);
@@ -202,7 +202,7 @@ public:
                     }
                     else
                     {
-                        error_x = 0.15f * (centroid_x - target_x);
+                        error_x = -0.15f * (centroid_x - target_x);
                         error_y = 0.15f * (target_y - centroid_y);
                         std::cout << "FestinoGrasping -> error x: " << error_x << "; error_y: " << error_y << std::endl;
                         FestinoHardware::move_manipulator(error_x, error_y, 0.0);

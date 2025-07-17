@@ -3,9 +3,7 @@ Panels:
     Help Height: 85
     Name: Displays
     Property Tree Widget:
-      Expanded:
-        - /Grid1
-        - /TF1/Frames1
+      Expanded: ~
       Splitter Ratio: 0.5
     Tree Height: 703
   - Class: rviz/Selection
@@ -57,6 +55,41 @@ Visualization Manager:
       Enabled: true
       Links:
         All Links Enabled: true
+        AxisX_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        AxisY_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        AxisZ_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        BaseFrame_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        ClawBase_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        ClawShovelL_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        ClawShovelR_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
@@ -66,10 +99,6 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        camera_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         camera_link:
           Alpha: 1
           Show Axes: false
@@ -80,30 +109,6 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        manipulator_AxisX_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        manipulator_AxisY_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        manipulator_AxisZ_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        manipulator_MovingPlate_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        manipulator_platform_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         platform_link:
           Alpha: 1
           Show Axes: false
@@ -185,9 +190,251 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        base_link:
+        AxisX_link:
           Value: true
-        camera_base_link:
+        AxisY_link:
+          Value: true
+        AxisZ_link:
+          Value: true
+        BaseFrame_link:
+          Value: true
+        C_Z11:
+          Value: true
+        C_Z12:
+          Value: true
+        C_Z13:
+          Value: true
+        C_Z14:
+          Value: true
+        C_Z15:
+          Value: true
+        C_Z16:
+          Value: true
+        C_Z17:
+          Value: true
+        C_Z18:
+          Value: true
+        C_Z21:
+          Value: true
+        C_Z22:
+          Value: true
+        C_Z22_input:
+          Value: true
+        C_Z22_output:
+          Value: true
+        C_Z23:
+          Value: true
+        C_Z24:
+          Value: true
+        C_Z25:
+          Value: true
+        C_Z26:
+          Value: true
+        C_Z27:
+          Value: true
+        C_Z28:
+          Value: true
+        C_Z31:
+          Value: true
+        C_Z32:
+          Value: true
+        C_Z33:
+          Value: true
+        C_Z34:
+          Value: true
+        C_Z35:
+          Value: true
+        C_Z36:
+          Value: true
+        C_Z37:
+          Value: true
+        C_Z38:
+          Value: true
+        C_Z41:
+          Value: true
+        C_Z42:
+          Value: true
+        C_Z43:
+          Value: true
+        C_Z44:
+          Value: true
+        C_Z45:
+          Value: true
+        C_Z46:
+          Value: true
+        C_Z47:
+          Value: true
+        C_Z48:
+          Value: true
+        C_Z51:
+          Value: true
+        C_Z52:
+          Value: true
+        C_Z53:
+          Value: true
+        C_Z54:
+          Value: true
+        C_Z55:
+          Value: true
+        C_Z56:
+          Value: true
+        C_Z57:
+          Value: true
+        C_Z58:
+          Value: true
+        C_Z61:
+          Value: true
+        C_Z62:
+          Value: true
+        C_Z63:
+          Value: true
+        C_Z64:
+          Value: true
+        C_Z65:
+          Value: true
+        C_Z66:
+          Value: true
+        C_Z67:
+          Value: true
+        C_Z68:
+          Value: true
+        C_Z71:
+          Value: true
+        C_Z72:
+          Value: true
+        C_Z73:
+          Value: true
+        C_Z74:
+          Value: true
+        C_Z75:
+          Value: true
+        C_Z76:
+          Value: true
+        C_Z77:
+          Value: true
+        C_Z78:
+          Value: true
+        ClawBase_link:
+          Value: true
+        ClawShovelL_link:
+          Value: true
+        ClawShovelR_link:
+          Value: true
+        Log_origin:
+          Value: true
+        M_Z11:
+          Value: true
+        M_Z12:
+          Value: true
+        M_Z13:
+          Value: true
+        M_Z14:
+          Value: true
+        M_Z15:
+          Value: true
+        M_Z16:
+          Value: true
+        M_Z17:
+          Value: true
+        M_Z18:
+          Value: true
+        M_Z21:
+          Value: true
+        M_Z22:
+          Value: true
+        M_Z23:
+          Value: true
+        M_Z24:
+          Value: true
+        M_Z25:
+          Value: true
+        M_Z26:
+          Value: true
+        M_Z27:
+          Value: true
+        M_Z28:
+          Value: true
+        M_Z31:
+          Value: true
+        M_Z32:
+          Value: true
+        M_Z33:
+          Value: true
+        M_Z34:
+          Value: true
+        M_Z35:
+          Value: true
+        M_Z36:
+          Value: true
+        M_Z37:
+          Value: true
+        M_Z38:
+          Value: true
+        M_Z41:
+          Value: true
+        M_Z42:
+          Value: true
+        M_Z43:
+          Value: true
+        M_Z44:
+          Value: true
+        M_Z45:
+          Value: true
+        M_Z46:
+          Value: true
+        M_Z47:
+          Value: true
+        M_Z48:
+          Value: true
+        M_Z51:
+          Value: true
+        M_Z52:
+          Value: true
+        M_Z53:
+          Value: true
+        M_Z54:
+          Value: true
+        M_Z55:
+          Value: true
+        M_Z56:
+          Value: true
+        M_Z57:
+          Value: true
+        M_Z58:
+          Value: true
+        M_Z61:
+          Value: true
+        M_Z62:
+          Value: true
+        M_Z63:
+          Value: true
+        M_Z64:
+          Value: true
+        M_Z65:
+          Value: true
+        M_Z66:
+          Value: true
+        M_Z67:
+          Value: true
+        M_Z68:
+          Value: true
+        M_Z71:
+          Value: true
+        M_Z72:
+          Value: true
+        M_Z73:
+          Value: true
+        M_Z74:
+          Value: true
+        M_Z75:
+          Value: true
+        M_Z76:
+          Value: true
+        M_Z77:
+          Value: true
+        M_Z78:
+          Value: true
+        base_link:
           Value: true
         camera_depth_frame:
           Value: true
@@ -201,10 +448,6 @@ Visualization Manager:
           Value: true
         laser_link:
           Value: false
-        manipulator_AxisX_link:
-          Value: true
-        manipulator_platform_link:
-          Value: true
         map:
           Value: true
         odom:
@@ -220,7 +463,7 @@ Visualization Manager:
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
-      Show Arrows: true
+      Show Arrows: false
       Show Axes: true
       Show Names: true
       Tree:
@@ -232,16 +475,249 @@ Visualization Manager:
             camera_rgb_optical_frame:
               {}
         map:
+          C_Z22_input:
+            {}
+          C_Z22_output:
+            {}
+          Log_origin:
+            C_Z11:
+              {}
+            C_Z12:
+              {}
+            C_Z13:
+              {}
+            C_Z14:
+              {}
+            C_Z15:
+              {}
+            C_Z16:
+              {}
+            C_Z17:
+              {}
+            C_Z18:
+              {}
+            C_Z21:
+              {}
+            C_Z22:
+              {}
+            C_Z23:
+              {}
+            C_Z24:
+              {}
+            C_Z25:
+              {}
+            C_Z26:
+              {}
+            C_Z27:
+              {}
+            C_Z28:
+              {}
+            C_Z31:
+              {}
+            C_Z32:
+              {}
+            C_Z33:
+              {}
+            C_Z34:
+              {}
+            C_Z35:
+              {}
+            C_Z36:
+              {}
+            C_Z37:
+              {}
+            C_Z38:
+              {}
+            C_Z41:
+              {}
+            C_Z42:
+              {}
+            C_Z43:
+              {}
+            C_Z44:
+              {}
+            C_Z45:
+              {}
+            C_Z46:
+              {}
+            C_Z47:
+              {}
+            C_Z48:
+              {}
+            C_Z51:
+              {}
+            C_Z52:
+              {}
+            C_Z53:
+              {}
+            C_Z54:
+              {}
+            C_Z55:
+              {}
+            C_Z56:
+              {}
+            C_Z57:
+              {}
+            C_Z58:
+              {}
+            C_Z61:
+              {}
+            C_Z62:
+              {}
+            C_Z63:
+              {}
+            C_Z64:
+              {}
+            C_Z65:
+              {}
+            C_Z66:
+              {}
+            C_Z67:
+              {}
+            C_Z68:
+              {}
+            C_Z71:
+              {}
+            C_Z72:
+              {}
+            C_Z73:
+              {}
+            C_Z74:
+              {}
+            C_Z75:
+              {}
+            C_Z76:
+              {}
+            C_Z77:
+              {}
+            C_Z78:
+              {}
+            M_Z11:
+              {}
+            M_Z12:
+              {}
+            M_Z13:
+              {}
+            M_Z14:
+              {}
+            M_Z15:
+              {}
+            M_Z16:
+              {}
+            M_Z17:
+              {}
+            M_Z18:
+              {}
+            M_Z21:
+              {}
+            M_Z22:
+              {}
+            M_Z23:
+              {}
+            M_Z24:
+              {}
+            M_Z25:
+              {}
+            M_Z26:
+              {}
+            M_Z27:
+              {}
+            M_Z28:
+              {}
+            M_Z31:
+              {}
+            M_Z32:
+              {}
+            M_Z33:
+              {}
+            M_Z34:
+              {}
+            M_Z35:
+              {}
+            M_Z36:
+              {}
+            M_Z37:
+              {}
+            M_Z38:
+              {}
+            M_Z41:
+              {}
+            M_Z42:
+              {}
+            M_Z43:
+              {}
+            M_Z44:
+              {}
+            M_Z45:
+              {}
+            M_Z46:
+              {}
+            M_Z47:
+              {}
+            M_Z48:
+              {}
+            M_Z51:
+              {}
+            M_Z52:
+              {}
+            M_Z53:
+              {}
+            M_Z54:
+              {}
+            M_Z55:
+              {}
+            M_Z56:
+              {}
+            M_Z57:
+              {}
+            M_Z58:
+              {}
+            M_Z61:
+              {}
+            M_Z62:
+              {}
+            M_Z63:
+              {}
+            M_Z64:
+              {}
+            M_Z65:
+              {}
+            M_Z66:
+              {}
+            M_Z67:
+              {}
+            M_Z68:
+              {}
+            M_Z71:
+              {}
+            M_Z72:
+              {}
+            M_Z73:
+              {}
+            M_Z74:
+              {}
+            M_Z75:
+              {}
+            M_Z76:
+              {}
+            M_Z77:
+              {}
+            M_Z78:
+              {}
           odom:
             base_link:
               laser_link:
                 {}
               platform_link:
-                camera_base_link:
-                  {}
-                manipulator_platform_link:
-                  manipulator_AxisX_link:
-                    {}
+                BaseFrame_link:
+                  AxisY_link:
+                    AxisX_link:
+                      AxisZ_link:
+                        ClawBase_link:
+                          ClawShovelL_link:
+                            {}
+                          ClawShovelR_link:
+                            {}
               wheel0_link:
                 {}
               wheel1_link:
@@ -358,7 +834,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.718898296356201
+      Distance: 9.779247283935547
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -366,17 +842,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -2.2997817993164062
-        Y: 0.1710897833108902
-        Z: 0.8480349779129028
+        X: -1.2188265323638916
+        Y: 1.5458203554153442
+        Z: 1.6904569864273071
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6847971677780151
+      Pitch: 1.094797134399414
       Target Frame: <Fixed Frame>
-      Yaw: 4.838186740875244
+      Yaw: 4.773202419281006
     Saved: ~
 Window Geometry:
   Displays:

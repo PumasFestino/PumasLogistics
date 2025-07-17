@@ -166,7 +166,7 @@ public:
         target_zone_ = goal->target_zone;
         state_ = SM_INIT;
         
-        ROS_INFO("Starting zone navigation to %s", target_zone_);
+        ROS_INFO("Starting zone navigation to %s", target_zone_.c_str());
         
         // Main state machine loop
         while(ros::ok() && success)
@@ -219,11 +219,11 @@ public:
                     // Wait for navigation to complete
                     if(simple_move_goal_status_.status == actionlib_msgs::GoalStatus::SUCCEEDED && 
                        simple_move_status_id_ == -1){
-                        ROS_INFO("Reached zone %s", target_zones_[target_index_].c_str());
+                        ROS_INFO("Reached zone %s", target_zone_.c_str());
                         state_ = SM_WAIT_AT_ZONE;
                     }
                     else if(simple_move_goal_status_.status == actionlib_msgs::GoalStatus::ABORTED){
-                        ROS_ERROR("Navigation to zone %s failed", target_zones_[target_index_].c_str());
+                        ROS_ERROR("Navigation to zone %s failed", target_zone_.c_str());
                         success = false;
                     }
                     break;

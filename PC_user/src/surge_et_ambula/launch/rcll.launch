@@ -9,14 +9,15 @@
     <node name="aruco_tf_srv" pkg="img_proc" type="aruco_tf_srv" output="screen" />
 
     <!--   Communication   -->
-    <include file="$(find robot_to_main_communication)/launch/robot_to_main_communication.launch" />
-    <node name="refbox_comm_node" pkg="ref_box_comm" type="refbox_comm_node" output="screen"/>
+    <!--<include file="$(find robot_to_main_communication)/launch/robot_to_main_communication.launch" /> -->
+    <!-- <node name="refbox_comm_node" pkg="ref_box_comm" type="refbox_comm_node" output="screen"/> -->
 
     <!--   Move   -->
     <node name="move_base" pkg="simple_move" type="move_base" output="screen" />
     <node name="aling_with_line" pkg="simple_move" type="aling_with_line" output="screen" />
 
     <include file="$(find movement_functions)/launch/logisticsZones_JM.launch" />
+    <node name="reload_amcl_service" pkg="movement_functions" type="reload_amcl_service"/>
 
     <!--   Festino tasks   -->
     <node name="grasping" pkg="festino_task" type="grasping" output="screen" />
