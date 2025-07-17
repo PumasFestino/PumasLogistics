@@ -21,7 +21,12 @@ std::vector<std::string> zone_queue;
 std::vector<std::string> tokens;
 
 // Instrucciones para probar
-std::vector<std::string> demo_instructions = ["move CS C_Z22 45","move BS M_Z11 0","move RS CS_Z34 90"];
+std::vector<std::string> demo_instructions = {
+    "move CS C_Z22 45",
+    "move BS M_Z11 0",
+    "move RS CS_Z34 90"
+};
+
 int instruction_index = 0;
 
 size_t current_zone_index = 0;
@@ -55,10 +60,10 @@ robot_to_main_communication::InstructionService::Response &res)
 
     memset(&buffer, 0, sizeof(buffer));         // Limpia el buffer
     return true;*/
-    res.instruction = demo_instructions[instruction_index].str();
+    res.instruction = demo_instructions[instruction_index];
     instruction_index++;
 
-    if (instruction_index == 3){
+    if (instruction_index == demo_instructions.size()){
         instruction_index = 0;
     }
 
