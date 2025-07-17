@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   InstructionService.srv
+  ZoneService.srv
 )
 
 generate_messages(

@@ -57,9 +57,8 @@ protected:
     
     // State machine variables
     SMState state_;
-    std::vector<std::string> target_zones_;
-    std::vector<geometry_msgs::PoseStamped> tf_target_zones_;
-    int target_index_;
+    std::string target_zone_;
+    geometry_msgs::PoseStamped tf_target_zone_;
     actionlib_msgs::GoalStatus simple_move_goal_status_;
     int simple_move_status_id_;
     
@@ -71,7 +70,6 @@ public:
         as_(nh_, name, boost::bind(&NavigateToZoneActionServer::executeCB, this, _1), false),
         action_name_(name),
         state_(SM_INIT),
-        target_index_(0),
         simple_move_status_id_(0)
     {
         // Initialize subscribers and publishers
@@ -101,31 +99,35 @@ public:
     bool transformZones()
     {
         tf::StampedTransform transform;
-        tf_target_zones_.clear();
-        tf_target_zones_.resize(target_zones_.size());
 
-        for(int i = 0; i < target_zones_.size(); i++){
-            try{
-                tf_listener_.lookupTransform(target_zones_[i], "/map", ros::Time(0), transform);
-                
-                tf_target_zones_[i].header.frame_id = "/map";
-                tf_target_zones_[i].pose.position.x = -transform.getOrigin().x();
-                tf_target_zones_[i].pose.position.y = -transform.getOrigin().y();
-                tf_target_zones_[i].pose.position.z = 0.0;
-                tf_target_zones_[i].pose.orientation.x = 0.0;
-                tf_target_zones_[i].pose.orientation.y = 0.0;
-                tf_target_zones_[i].pose.orientation.z = 0.0;
-                tf_target_zones_[i].pose.orientation.w = 1.0;
-                
-                ROS_INFO("Transformed zone %s to position (%.2f, %.2f)", 
-                    target_zones_[i].c_str(), 
-                    tf_target_zones_[i].pose.position.x, 
-                    tf_target_zones_[i].pose.position.y);
-            }
-            catch (tf::TransformException ex){
-                ROS_ERROR("Transform failed for zone %s: %s", target_zones_[i].c_str(), ex.what());
-                return false;
-            }
+        tf_target_zone_.pose.position.x = 0.0;
+        tf_target_zone_.pose.position.y = 0.0;
+        tf_target_zone_.pose.position.z = 0.0;
+        tf_target_zone_.pose.orientation.x = 0.0;
+        tf_target_zone_.pose.orientation.y = 0.0;
+        tf_target_zone_.pose.orientation.z = 0.0;
+        tf_target_zone_.pose.orientation.w = 0.0;
+
+        try{
+            tf_listener_.lookupTransform(target_zone_, "/map", ros::Time(0), transform);
+            
+            tf_target_zone_.header.frame_id = "/map";
+            tf_target_zone_.pose.position.x = -transform.getOrigin().x();
+            tf_target_zone_.pose.position.y = -transform.getOrigin().y();
+            tf_target_zone_.pose.position.z = 0.0;
+            tf_target_zone_.pose.orientation.x = 0.0;
+            tf_target_zone_.pose.orientation.y = 0.0;
+            tf_target_zone_.pose.orientation.z = 0.0;
+            tf_target_zone_.pose.orientation.w = 1.0;
+            
+            ROS_INFO("Transformed zone %s to position (%.2f, %.2f)", 
+                target_zone_.c_str(), 
+                tf_target_zone_.pose.position.x, 
+                tf_target_zone_.pose.position.y);
+        }
+        catch (tf::TransformException ex){
+            ROS_ERROR("Transform failed for zone %s: %s", target_zone_.c_str(), ex.what());
+            return false;
         }
         return true;
     }
@@ -161,11 +163,10 @@ public:
         bool success = true;
         
         // Initialize from goal
-        target_zones_ = goal->target_zones;
-        target_index_ = 0;
+        target_zone_ = goal->target_zone;
         state_ = SM_INIT;
         
-        ROS_INFO("Starting zone navigation with %lu zones", target_zones_.size());
+        ROS_INFO("Starting zone navigation to %s", target_zone_);
         
         // Main state machine loop
         while(ros::ok() && success)
@@ -183,7 +184,7 @@ public:
                     ROS_INFO("State: SM_INIT");
                     updateFeedback("Initializing navigation");
                     
-                    if(target_zones_.empty()){
+                    if(target_zone_ == ""){
                         ROS_ERROR("No target zones provided");
                         success = false;
                         break;
@@ -207,15 +208,13 @@ public:
                     break;
                 
                 case SM_NAV_TO_ZONE:
-                    ROS_INFO("State: SM_NAV_TO_ZONE - Navigating to zone %s (%d/%lu)", 
-                        target_zones_[target_index_].c_str(), 
-                        target_index_ + 1, 
-                        target_zones_.size());
+                    ROS_INFO("State: SM_NAV_TO_ZONE - Navigating to zone %s", 
+                        target_zone_.c_str());
                     
-                    updateFeedback("Navigating to zone: " + target_zones_[target_index_]);
+                    updateFeedback("Navigating to zone: " + target_zone_);
                     
                     // Publish navigation goal
-                    pub_goal_.publish(tf_target_zones_[target_index_]);
+                    pub_goal_.publish(tf_target_zone_);
                     
                     // Wait for navigation to complete
                     if(simple_move_goal_status_.status == actionlib_msgs::GoalStatus::SUCCEEDED && 
@@ -231,7 +230,7 @@ public:
                 
                 case SM_WAIT_AT_ZONE:
                     ROS_INFO("State: SM_WAIT_AT_ZONE");
-                    updateFeedback("Waiting at zone: " + target_zones_[target_index_]);
+                    updateFeedback("Waiting at zone: " + target_zone_);
                     
                     // Stay at zone for 5 seconds
                     ros::Duration(5.0).sleep();
@@ -240,22 +239,15 @@ public:
                 
                 case SM_REPORT_POSE:{
                     ROS_INFO("State: SM_REPORT_POSE");
-                    updateFeedback("Reporting pose for zone: " + target_zones_[target_index_]);
+                    updateFeedback("Reporting pose for zone: " + target_zone_);
                     
                     // Report current position
                     geometry_msgs::Point current_pos = getCurrentRobotPosition();
                     if(FestinoCommunication::reportPose(current_pos.x, current_pos.y) == false){
-                        ROS_WARN("Pose could not be reported for zone %s", target_zones_[target_index_].c_str());
+                        ROS_WARN("Pose could not be reported for zone %s", target_zone_.c_str());
                     }
                     
-                    // Move to next zone or finish
-                    target_index_++;
-                    if(target_index_ >= target_zones_.size()){
-                        state_ = SM_FINAL_STATE;
-                    }
-                    else{
-                        state_ = SM_NAV_TO_ZONE;
-                    }
+                    state_ = SM_FINAL_STATE;
                     break;
                 }
                 case SM_FINAL_STATE:

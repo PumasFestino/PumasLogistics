@@ -55,12 +55,14 @@
   <build_depend>protobuf_comm</build_depend>
   <build_depend>refbox_protobuf_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>festino_tools</build_depend>
 
 
 
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>tug_protobuf</build_export_depend>
   <build_export_depend>geometry_msgs</build_export_depend>
+  <build_export_depend>festino_tools</build_export_depend>
 
 
 
@@ -68,6 +70,7 @@
   <exec_depend>protobuf_comm</exec_depend>
   <exec_depend>refbox_protobuf_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>festino_tools</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

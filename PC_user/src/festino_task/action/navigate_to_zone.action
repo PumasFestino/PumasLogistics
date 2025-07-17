@@ -1,4 +1,4 @@
-string[] target_zones               # Simple string
+string target_zone
 ---
 bool success
 ---

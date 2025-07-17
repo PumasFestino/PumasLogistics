@@ -27,13 +27,13 @@ bool FestinoTask::grasp(const std::string& action) {
     }
 }
 
-bool FestinoTask::navigate(const std::vector<std::string>& zones) {
+bool FestinoTask::navigate(const std::string& zone) {
     actionlib::SimpleActionClient<festino_task::navigate_to_zoneAction> client("zone_navigation", true);
     ROS_INFO("[FestinoTask] Esperando servidor de navegación...");
     client.waitForServer();
 
     festino_task::navigate_to_zoneGoal goal;
-    goal.target_zones = zones;
+    goal.target_zone = zone;
 
     client.sendGoal(goal);
     client.waitForResult(ros::Duration(60.0));

@@ -14,6 +14,6 @@ private:
 public:
     static bool setNodeHandle(ros::NodeHandle* nh);
     static bool grasp(const std::string& action);
-    static bool navigate(const std::vector<std::string>& zones);
+    static bool navigate(const std::string& zones);
     static bool poseRobot(bool align, const std::string& mps_type, const std::string& mps_band);
 };
