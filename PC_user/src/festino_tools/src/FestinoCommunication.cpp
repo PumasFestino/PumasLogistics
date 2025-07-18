@@ -21,22 +21,42 @@ bool FestinoCommunication::setNodeHandle(ros::NodeHandle* nh)
     return true;
 }
 
-bool FestinoCommunication::getInstruction(std::vector<std::string>* tokens)
+bool FestinoCommunication::getInstruction(std::vector<std::string>* tokens, string command)
 {
     robot_to_main_communication::InstructionService srv;
-    srv.request.request = "instruction";
+    srv.request.request = command;
 
     if(instruction_client.call(srv)){
+        
+        std::string instruction_str = srv.response.instruction;        
+
+         // Elimina espacios al inicio y final
+        boost::algorithm::trim(instruction_str);
+
+        if (instruction_str.empty()) {
+            return false;
+        }
+
         std::vector<std::string> temp_tokens;
 
-        // Divide la cadena en tokens
-        boost::algorithm::split(temp_tokens, srv.response.instruction, boost::is_any_of(" "), boost::token_compress_on);
+        if (command == "n"){ // "n" es para instrucciones, "z" es para zonas
 
-        // Rellena o recorta a 5 elementos
-        while (temp_tokens.size() < 5)
-            temp_tokens.push_back("");
-        if (temp_tokens.size() > 5)
-            temp_tokens.resize(5);
+            // Divide la cadena en tokens
+            boost::algorithm::split(temp_tokens, srv.response.instruction, boost::is_any_of(" "), boost::token_compress_on);
+
+            // Rellena o recorta a 5 elementos
+            while (temp_tokens.size() < 5)
+                temp_tokens.push_back("");
+            
+            if (temp_tokens.size() > 5)
+                temp_tokens.resize(5);
+        }
+
+        else if (command == "z"){
+
+            // Solo agrega la cadena completa como un único elemento
+            temp_tokens.push_back(instruction_str);
+        }
 
         *tokens = temp_tokens;
         return true;

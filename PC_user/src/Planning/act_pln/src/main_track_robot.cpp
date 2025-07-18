@@ -39,6 +39,7 @@ int cont_instructions = 0;
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
     SM_INIT,
+    SM_WAIT_FOR_ZONES,
 	SM_WAIT_FOR_INSTRUCTION,
 	SM_MOVE,
     SM_ALIGN,
@@ -62,7 +63,7 @@ void request_instruction(){
     std::cout << "Request a new instruction" << std::endl;	
     instructionTokens.clear();
 
-    if(FestinoCommunication::getInstruction(&instructionTokens)){
+    if(FestinoCommunication::getInstruction(&instructionTokens,"n")){
         std::cout << "The instruction is: " <<  instructionTokens[0] << std::endl;	
         request = true;
 
@@ -167,8 +168,21 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
 	            std::cout << "I am ready for the main track challenge" << std::endl;
                 
-	    	    state = SM_WAIT_FOR_INSTRUCTION;
+	    	    state = SM_WAIT_FOR_ZONES;
 	    		break;
+
+            case SM_WAIT_FOR_ZONES:
+                std::cout << "State machine: SM_WAIT_FOR_ZONES" << std::endl;
+                instructionTokens.clear();
+                if (FestinoCommunication::getInstruction(&instructionTokens,"z")){
+                    FestinoNavigation::modifyMap(std::string zones)
+                    ros::Duration(20, 0).sleep();
+                    state = SM_WAIT_FOR_INSTRUCTION
+                }
+                else
+                {
+                    ros::Duration(10, 0).sleep();
+                }
 
 			case SM_WAIT_FOR_INSTRUCTION:
 	    		std::cout << "State machine: SM_WAIT_FOR_INSTRUCTION" << std::endl;	
