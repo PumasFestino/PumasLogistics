@@ -53,24 +53,34 @@ robot_to_main_communication::InstructionService::Response &res)
 
     std::stringstream ss;
 
-    write(client_fd, command.c_str(), command.length());
-    valread = read(client_fd, buffer, sizeof(buffer));
+    if (command == "z" || command == "n")
+    {
+        write(client_fd, command.c_str(), command.length());
+        valread = read(client_fd, buffer, sizeof(buffer));
 
-    ss << buffer;
+        ss << buffer;
 
-    res.instruction = ss.str();
+        res.instruction = ss.str();
 
-    memset(&buffer, 0, sizeof(buffer));         // Limpia el buffer
+        memset(&buffer, 0, sizeof(buffer));         // Limpia el buffer
+    }
+    else
+    {
+        std::cout << "INVALID COMMAND: " << command << std::endl;
+    }
+
     return true;
 
-    /*res.instruction = demo_instructions[instruction_index];
+    /*****************  TESTING **************************
+    res.instruction = demo_instructions[instruction_index];
     instruction_index++;
 
     if (instruction_index == demo_instructions.size()){
         instruction_index = 0;
-    }*/
+    }
 
     return true;
+    ******************************************************/
 }
 
 // Servicio que devuelve una zona por cada solicitud "true"
