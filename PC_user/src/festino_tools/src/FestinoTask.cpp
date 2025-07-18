@@ -16,7 +16,7 @@ bool FestinoTask::grasp(const std::string& action) {
     goal.action_manip = action;
 
     client.sendGoal(goal);
-    client.waitForResult(ros::Duration(30.0));
+    //client.waitForResult(ros::Duration(30.0));
 
     if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
         ROS_INFO("[FestinoTask] Grasping completado");

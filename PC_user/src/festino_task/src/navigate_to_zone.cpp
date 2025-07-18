@@ -29,6 +29,7 @@
 
 /*------------------------Festino Tools-----------------*/
 #include "festino_tools/FestinoCommunication.h"
+#include "festino_tools/FestinoNavigation.h"
 
 //Se puede cambiar, agregar o eliminar los estados
 enum SMState {
@@ -61,6 +62,7 @@ protected:
     geometry_msgs::PoseStamped tf_target_zone_;
     actionlib_msgs::GoalStatus simple_move_goal_status_;
     int simple_move_status_id_;
+    double target_angle;
     
     // Transform listener
     tf::TransformListener tf_listener_;
@@ -214,10 +216,10 @@ public:
                     updateFeedback("Navigating to zone: " + target_zone_);
                     
                     // Publish navigation goal
-                    pub_goal_.publish(tf_target_zone_);
+                    // pub_goal_.publish(tf_target_zone_);
                     
                     // Wait for navigation to complete
-                    if(simple_move_goal_status_.status == actionlib_msgs::GoalStatus::SUCCEEDED && 
+                    /*if(simple_move_goal_status_.status == actionlib_msgs::GoalStatus::SUCCEEDED && 
                        simple_move_status_id_ == -1){
                         ROS_INFO("Reached zone %s", target_zone_.c_str());
                         state_ = SM_WAIT_AT_ZONE;
@@ -225,6 +227,23 @@ public:
                     else if(simple_move_goal_status_.status == actionlib_msgs::GoalStatus::ABORTED){
                         ROS_ERROR("Navigation to zone %s failed", target_zone_.c_str());
                         success = false;
+                    }*/
+                    target_angle = std::atan2(
+                        2.0 * (tf_target_zone_.pose.orientation.w * tf_target_zone_.pose.orientation.z + 
+                               tf_target_zone_.pose.orientation.x * tf_target_zone_.pose.orientation.y),
+                        1.0 - 2.0 * (tf_target_zone_.pose.orientation.y * tf_target_zone_.pose.orientation.y + 
+                                     tf_target_zone_.pose.orientation.z * tf_target_zone_.pose.orientation.z));
+
+                    if(!FestinoNavigation::getClose(tf_target_zone_.pose.position.x,
+                        tf_target_zone_.pose.position.y, target_angle, 120000)){
+                        if(!FestinoNavigation::getClose(tf_target_zone_.pose.position.x,
+                        tf_target_zone_.pose.position.y, target_angle, 120000)){
+                            ROS_ERROR("Navigation to zone %s failed", target_zone_.c_str());
+                        }else{
+                            state_ = SM_WAIT_AT_ZONE;
+                        }
+                    }else{
+                        state_ = SM_WAIT_AT_ZONE;
                     }
                     break;
                 
