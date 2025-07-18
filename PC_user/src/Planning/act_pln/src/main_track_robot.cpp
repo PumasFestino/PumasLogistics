@@ -176,7 +176,7 @@ int main(int argc, char** argv){
                 instructionTokens.clear();
                 if (FestinoCommunication::getInstruction(&instructionTokens,"z")){
                     FestinoNavigation::modifyMap(instructionTokens[0]);
-                    ros::Duration(20, 0).sleep();
+                    ros::Duration(35, 0).sleep();
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
                 else
