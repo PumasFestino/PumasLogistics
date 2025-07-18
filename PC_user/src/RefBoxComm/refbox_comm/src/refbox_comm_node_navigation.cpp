@@ -1421,13 +1421,13 @@ int main(int argc, char** argv)
     ros::Rate r(10);
     while (ros::ok()) {
 
-        std::vector<std::string> tokens;
-        if (FestinoCommunication::getInstruction(&tokens)) {
+        /*std::vector<std::string> tokens;
+        if (FestinoCommunication::getInstruction(&tokens,"z")) {
             if (!tokens.empty()) {
                 std::string current_zone = tokens[0];
                 ROS_INFO_STREAM("Siguiente zona: " << current_zone);
             }
-        }
+        }*/
 
         //Obtaining robot location
 	geometry_msgs::PoseStamped tf_robot_pose;

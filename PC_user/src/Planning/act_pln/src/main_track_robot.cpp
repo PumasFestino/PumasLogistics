@@ -175,9 +175,9 @@ int main(int argc, char** argv){
                 std::cout << "State machine: SM_WAIT_FOR_ZONES" << std::endl;
                 instructionTokens.clear();
                 if (FestinoCommunication::getInstruction(&instructionTokens,"z")){
-                    FestinoNavigation::modifyMap(instructionTokens[0])
+                    FestinoNavigation::modifyMap(instructionTokens[0]);
                     ros::Duration(20, 0).sleep();
-                    state = SM_WAIT_FOR_INSTRUCTION
+                    state = SM_WAIT_FOR_INSTRUCTION;
                 }
                 else
                 {

@@ -21,7 +21,7 @@ bool FestinoCommunication::setNodeHandle(ros::NodeHandle* nh)
     return true;
 }
 
-bool static bool FestinoCommunication::getInstruction(std::vector<std::string>* tokens, std::string command)
+bool FestinoCommunication::getInstruction(std::vector<std::string>* tokens, std::string command)
 {
     robot_to_main_communication::InstructionService srv;
     srv.request.request = command;
