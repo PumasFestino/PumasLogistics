@@ -30,6 +30,9 @@ ros::Publisher FestinoNavigation::pubMvnPlnGetCloseXYA;
 ros::Publisher FestinoNavigation::pubNavigationStop;
 ros::Publisher FestinoNavigation::pubCmdVel;
 
+
+ros::Publisher FestinoNavigation::pubModMap;
+
 //actionlib::SimpleActionClient<move_base::move_baseAction>* FestinoNavigation::actionMoveBase = nullptr;
 
 //Publishers and subscribers for localization
@@ -57,6 +60,7 @@ bool FestinoNavigation::setNodeHandle(ros::NodeHandle* nh)
     pubCmdVel              = nh->advertise<geometry_msgs::Twist>       ("/cmd_vel", 10);
     cltMoveBase            = nh->serviceClient<simple_move::MoveBase>  ("/navigation/move_base");
     cltAlingWithLine       = nh->serviceClient<simple_move::LaserScanAling>  ("/navigation/align_with_line");
+    pubModMap              = nh->advertise<std_msgs::String>           ("//zone_modifications", 1);
 
     tf_listener = new tf::TransformListener();
     is_node_set = true;
@@ -448,4 +452,13 @@ void FestinoNavigation::callbackNavigationStatus(const actionlib_msgs::GoalStatu
 void FestinoNavigation::callbackLaserScan(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
     FestinoNavigation::_laserScan = *msg;
+}
+
+void FestinoNavigation::modifyMap(std::string zones)
+{
+    std_msgs::String msg;
+    msg.data = zones;
+    //FestinoNavigation::_isGlobalGoalReached = false;
+    pubModMap.publish(msg);
+    ros::spinOnce();
 }

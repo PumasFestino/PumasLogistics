@@ -39,8 +39,12 @@ private:
     static ros::Publisher pubMvnPlnGetCloseXYA;
     static ros::Publisher pubNavigationStop;
     static ros::Publisher pubCmdVel;
+
     //Publishers and subscribers for localization
     static tf::TransformListener* tf_listener;
+
+    //Publishers for mod map
+    static ros::Publisher pubModMap;
 
     //Variables for Festino navigation:
     static actionlib_msgs::GoalStatus  _navigation_status;
@@ -94,4 +98,6 @@ public:
     static void move_base(int x, int y, double vel, double distance);
     static void move_base_angle(double vel, double angle);
     static void alingWithLine(bool enable);
+
+    static void modifyMap(std::string zones);
 };
