@@ -94,6 +94,7 @@ using namespace protobuf_comm;
         float pose_x = 0.0f;
         float pose_y = 0.0f;
         float pose_ori = 0.0f;
+        bool zonesSent = true;
         ros::Publisher pub_zone;
 //--------------------------------NAVIGATION CHALLENGE
 
@@ -938,41 +939,44 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
                     ROS_INFO_STREAM(""<< navigation_routes->ShortDebugString());
 
                     
-//navigation_routes->routes_size
-                                        //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(0));
+                    //navigation_routes->routes_size
+                                                            //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(0));
+                    if(zonesSent){
+                        string my_msg = "";
+                            for(int i = 0; i < navigation_routes->routes().Get(0).route_size(); i++){
+                            // ROS_INFO_STREAM("UNA ZONA " << i);
+                                //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
+                                my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
+                            }
+                            /*2 robots, each plan on each robot*/
+                            /*
+                        if(ROBOT_NO == 1){
+                            for(int i = 0; i < navigation_routes->routes().Get(0).route_size() / 2; i++){
+                            // ROS_INFO_STREAM("UNA ZONA " << i);
+                                //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
+                                my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
+                            }
+                        } else {//ROBOT_NO == 2
+                            for(int i = navigation_routes->routes().Get(0).route_size() / 2; i < navigation_routes->routes().Get(0).route_size(); i++){
+                            // ROS_INFO_STREAM("UNA ZONA " << i);
+                                //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
+                                my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
+                            }
+                        }
+                        */
 
-string my_msg = "";
-    for(int i = 0; i < navigation_routes->routes().Get(0).route_size(); i++){
-    // ROS_INFO_STREAM("UNA ZONA " << i);
-        //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
-        my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
-    }
-    /*2 robots, each plan on each robot*/
-    /*
-if(ROBOT_NO == 1){
-    for(int i = 0; i < navigation_routes->routes().Get(0).route_size() / 2; i++){
-    // ROS_INFO_STREAM("UNA ZONA " << i);
-        //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
-        my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
-    }
-} else {//ROBOT_NO == 2
-    for(int i = navigation_routes->routes().Get(0).route_size() / 2; i < navigation_routes->routes().Get(0).route_size(); i++){
-    // ROS_INFO_STREAM("UNA ZONA " << i);
-        //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
-        my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
-    }
-}
-*/
+                               std_msgs::String el_msg;
+                           
+                               //std::stringstream ss;
+                               //ss << my_msg << count;
+                               el_msg.data = my_msg;//ss.str();
+                           
 
-       std_msgs::String el_msg;
-   
-       //std::stringstream ss;
-       //ss << my_msg << count;
-       el_msg.data = my_msg;//ss.str();
-   
+                        ROS_INFO_STREAM(" el mensaje :O " << el_msg.data);
+                        pub_zone.publish(el_msg);
 
-ROS_INFO_STREAM(" el mensaje :O " << el_msg.data);
-pub_zone.publish(el_msg);
+                        zonesSent = false;
+                    }
   /*                                      const char* ch = navigation_routes->ShortDebugString().c_str();
                                         string s = ch;
                     ROS_INFO_STREAM("------2 NAVIGATION CHALLENGE / RouteASSTRING--------- " << ch << " str " << s);

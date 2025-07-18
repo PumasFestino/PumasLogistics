@@ -63,22 +63,34 @@ void request_instruction(){
     std::cout << "Request a new instruction" << std::endl;	
     instructionTokens.clear();
 
-    if(FestinoCommunication::getInstruction(&instructionTokens,"n")){
-        std::cout << "The instruction is: " <<  instructionTokens[0] << std::endl;	
+    if (!FestinoCommunication::getZone(&instructionTokens)) {
+        if(FestinoCommunication::getInstruction(&instructionTokens,"n")) {
+            std::cout << "The instruction is: " <<  instructionTokens[0] << std::endl;	
+            request = true;
+
+            if(instructionTokens[0] == "move"){
+                state = SM_MOVE;
+                return;
+            }else if(instructionTokens[0] == "retrieve"){
+                state = SM_RETRIEVE;
+                return;
+            }else if(instructionTokens[0] == "deliver"){
+                state = SM_DELIVER;
+                return;
+            }else{
+                request = false;
+                return;
+            }
+        }
+    } else {
+        std::cout << "The instruction is: " <<  instructionTokens[0] << std::endl;  
         request = true;
 
         if(instructionTokens[0] == "move"){
             state = SM_MOVE;
             return;
-        }
-
-        if(instructionTokens[0] == "retrieve"){
-            state = SM_RETRIEVE;
-            return;
-        }
-
-        if(instructionTokens[0] == "deliver"){
-            state = SM_DELIVER;
+        } else {
+            request = false;
             return;
         }
     }

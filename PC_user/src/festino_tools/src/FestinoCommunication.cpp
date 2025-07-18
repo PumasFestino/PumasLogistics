@@ -16,7 +16,7 @@ bool FestinoCommunication::setNodeHandle(ros::NodeHandle* nh)
     std::cout << "FestinoCommunication.->Setting ros node..." << std::endl;
 
     instruction_client = nh->serviceClient<robot_to_main_communication::InstructionService>("/instruction_msg");
-    zone_client = nh->serviceClient<robot_to_main_communication::ZoneService>("/zone_msg");
+    zone_client = nh->serviceClient<robot_to_main_communication::ZoneService>("/nav_zones");
     FestinoCommunication::is_node_set = true;
     return true;
 }
@@ -30,7 +30,7 @@ bool FestinoCommunication::getInstruction(std::vector<std::string>* tokens, std:
         
         std::string instruction_str = srv.response.instruction;        
 
-         // Elimina espacios al inicio y final
+        // Elimina espacios al inicio y final
         boost::algorithm::trim(instruction_str);
 
         if (instruction_str.empty()) {
@@ -73,7 +73,11 @@ bool FestinoCommunication::getZone(std::vector<std::string>* tokens)
 
     if(zone_client.call(srv)){
         tokens->clear();
-        boost::algorithm::split(*tokens, srv.response.zone, boost::is_any_of(" "), boost::token_compress_on);
+        if (srv.response.zone != "DONE"){
+            boost::algorithm::split(*tokens, srv.response.zone, boost::is_any_of(" "), boost::token_compress_on);
+        }else{
+            return false;
+        }
         return true;
     } else {
         ROS_ERROR("FestinoCommunication.->Failed to call /zone_msg");

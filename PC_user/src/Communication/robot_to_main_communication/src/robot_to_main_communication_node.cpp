@@ -31,7 +31,7 @@ int instruction_index = 0;
 
 size_t current_zone_index = 0;
 
-// Callback para recibir las zonas desde /pub_zone
+// Callback para recibir las zonas desde /zone_msg
 void zoneCallback(const std_msgs::String::ConstPtr& msg)
 {
     zone_queue.clear();
@@ -88,8 +88,8 @@ bool handle_zone(robot_to_main_communication::ZoneService::Request &req,
 robot_to_main_communication::ZoneService::Response &res)
 { 
     if (req.request == "true") {
-        if (current_zone_index < zone_queue.size()) {
-            res.zone = "move CS" + zone_queue[current_zone_index++] + zone_queue[current_zone_index++];
+        if (current_zone_index <= zone_queue.size()) {
+            res.zone = "move CS " + zone_queue[current_zone_index++] + " 0 " + "";
             ROS_INFO("Enviando zona: %s", res.zone.c_str());
         } else {
             res.zone = "DONE"; // Ya no hay más zonas
@@ -107,12 +107,12 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "robot_to_main_communication_node");
     ros::NodeHandle nh;
 
-    ros::Subscriber zone_sub = nh.subscribe("/pub_zone", 10, zoneCallback);
+    ros::Subscriber zone_sub = nh.subscribe("/zone_msg", 10, zoneCallback);
     ros::ServiceServer instruction_srv = nh.advertiseService("/instruction_msg", handle_instruction);
-    ros::ServiceServer zone_srv = nh.advertiseService("/zone_msg", handle_zone);
+    ros::ServiceServer zone_srv = nh.advertiseService("/nav_zones", handle_zone);
 
     ROS_INFO("Servicio /instruction_msg listo");
-    ROS_INFO("Servicio /zone_msg listo");
+    ROS_INFO("Servicio /nav_zones listo");
     ros::spin();
 
     return 0;

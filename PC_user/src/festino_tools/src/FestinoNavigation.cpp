@@ -60,7 +60,7 @@ bool FestinoNavigation::setNodeHandle(ros::NodeHandle* nh)
     pubCmdVel              = nh->advertise<geometry_msgs::Twist>       ("/cmd_vel", 10);
     cltMoveBase            = nh->serviceClient<simple_move::MoveBase>  ("/navigation/move_base");
     cltAlingWithLine       = nh->serviceClient<simple_move::LaserScanAling>  ("/navigation/align_with_line");
-    pubModMap              = nh->advertise<std_msgs::String>           ("//zone_modifications", 1);
+    pubModMap              = nh->advertise<std_msgs::String>           ("/zone_modifications", 1);
 
     tf_listener = new tf::TransformListener();
     is_node_set = true;
