@@ -19,9 +19,11 @@ ros::ServiceClient FestinoVision::cltQRSrv;
 
 //Logistics Vision Tasks
 ros::ServiceClient FestinoVision::cltCameraTask;
-ros::Subscriber FestinoVision::subCentroidPiece;
-float FestinoVision::_centroid_x;
-float FestinoVision::_centroid_y;
+
+ros::Subscriber FestinoVision::subCentroidArray;
+std::map<std::string, geometry_msgs::Point> FestinoVision::classified_centroids;
+std::mutex FestinoVision::data_mutex_;
+
 
 ros::NodeHandle* FestinoVision::nh = nullptr;
 
@@ -51,7 +53,7 @@ bool FestinoVision::setNodeHandle(ros::NodeHandle* _nh)
 
     //Logistics camera tasks
     cltCameraTask    =   nh -> serviceClient<vision_logistics::RunTask>("/vision/run_camera_task");
-    subCentroidPiece =   nh -> subscribe("/vision/lid_centroid", 1, &FestinoVision::callbackCentroid);
+    subCentroidArray = nh->subscribe("/vision/lid_centroids_array", 1, &FestinoVision::callbackCentroidArray);
 
 
     //Pose Estimation controls
@@ -156,25 +158,39 @@ std::string FestinoVision::enableQRDetect(bool enabled)
     return srv.response.qr_data;
 }
 
-void FestinoVision::callbackCentroid(const geometry_msgs::Point::ConstPtr& msg)
+void FestinoVision::callbackCentroidArray(const yolo_lid::PointArray::ConstPtr& msg)
 {
-    _centroid_x = msg -> x;
-    _centroid_y = msg -> y;
-    //_tag_id = msg -> z;
-}
+    std::lock_guard<std::mutex> lock(data_mutex_);
+    classified_centroids.clear();
 
+    for (const auto& p : msg->points)
+    {
+        int class_id = static_cast<int>(p.z);
+        std::string label;
+
+        switch (class_id)
+        {
+            case 0: label = "platform"; break;
+            case 1: label = "piece";    break;
+            case 2: label = "band";     break;
+            default: continue;  // Ignorar clases no relevantes
+        }
+
+        // Guarda solo el primero encontrado por clase
+        if (classified_centroids.find(label) == classified_centroids.end())
+            classified_centroids[label] = p;
+    }
+}
  
 std::pair<double, double> FestinoVision::find(std::string thing)
 {
-    if (thing == "piece"){
-        return std::make_pair(_centroid_x, _centroid_y); 
-    }
-    else if (thing == "platform"){
-        return std::make_pair(_centroid_x, _centroid_y); 
-    }
-    else if (thing == "band"){
-        return std::make_pair(_centroid_x, _centroid_y); 
-    }
+    std::lock_guard<std::mutex> lock(data_mutex_);
+
+    auto it = classified_centroids.find(thing);
+    if (it != classified_centroids.end())
+        return std::make_pair(it->second.x, it->second.y);
+    else
+        return std::make_pair(-1.0, -1.0);  // O valores especiales indicando "no encontrado"
 }
 
 float FestinoVision::findBand()
