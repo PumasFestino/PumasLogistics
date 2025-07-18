@@ -22,14 +22,14 @@ bool FestinoTask::grasp(const std::string& action) {
         ROS_INFO("[FestinoTask] Grasping completado");
         return client.getResult()->success;
     } else {
-        ROS_WARN("[FestinoTask] Grasping falló o expiró");
+        ROS_WARN("[FestinoTask] Grasping fallo o expiro");
         return false;
     }
 }
 
 bool FestinoTask::navigate(const std::string& zone) {
     actionlib::SimpleActionClient<festino_task::navigate_to_zoneAction> client("zone_navigation", true);
-    ROS_INFO("[FestinoTask] Esperando servidor de navegación...");
+    ROS_INFO("[FestinoTask] Esperando servidor de navegacion...");
     client.waitForServer();
 
     festino_task::navigate_to_zoneGoal goal;
@@ -39,10 +39,10 @@ bool FestinoTask::navigate(const std::string& zone) {
     client.waitForResult(ros::Duration(60.0));
 
     if (client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
-        ROS_INFO("[FestinoTask] Navegación completada");
+        ROS_INFO("[FestinoTask] Navegacion completada");
         return client.getResult()->success;
     } else {
-        ROS_WARN("[FestinoTask] Navegación falló o expiró");
+        ROS_WARN("[FestinoTask] Navegación fallo o expiro");
         return false;
     }
 }

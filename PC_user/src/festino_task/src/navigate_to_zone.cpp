@@ -102,6 +102,7 @@ public:
     {
         tf::StampedTransform transform;
 
+        tf_target_zone_.header.frame_id = "/map";
         tf_target_zone_.pose.position.x = 0.0;
         tf_target_zone_.pose.position.y = 0.0;
         tf_target_zone_.pose.position.z = 0.0;
@@ -111,13 +112,13 @@ public:
         tf_target_zone_.pose.orientation.w = 0.0;
 
         try{
-            tf_listener_.lookupTransform(target_zone_, "/map", ros::Time(0), transform);
+            tf_listener_.lookupTransform("/map", target_zone_, ros::Time(0), transform);
             
             tf_target_zone_.header.frame_id = "/map";
-            tf_target_zone_.pose.position.x = -transform.getOrigin().x();
-            tf_target_zone_.pose.position.y = -transform.getOrigin().y();
+            tf_target_zone_.pose.position.x = transform.getOrigin().x();
+            tf_target_zone_.pose.position.y = transform.getOrigin().y();
             tf_target_zone_.pose.position.z = 0.0;
-            tf_target_zone_.pose.orientation.x = 0.0;
+            tf_target_zone_.pose.orientation.x = transform.getRotation().x();
             tf_target_zone_.pose.orientation.y = 0.0;
             tf_target_zone_.pose.orientation.z = 0.0;
             tf_target_zone_.pose.orientation.w = 1.0;
@@ -228,16 +229,20 @@ public:
                         ROS_ERROR("Navigation to zone %s failed", target_zone_.c_str());
                         success = false;
                     }*/
+                    std::cout << "Compute quaternion" << std::endl;
+
                     target_angle = std::atan2(
                         2.0 * (tf_target_zone_.pose.orientation.w * tf_target_zone_.pose.orientation.z + 
                                tf_target_zone_.pose.orientation.x * tf_target_zone_.pose.orientation.y),
                         1.0 - 2.0 * (tf_target_zone_.pose.orientation.y * tf_target_zone_.pose.orientation.y + 
                                      tf_target_zone_.pose.orientation.z * tf_target_zone_.pose.orientation.z));
 
+                    std::cout << "Angle: " << target_angle << std::endl;
+
                     if(!FestinoNavigation::getClose(tf_target_zone_.pose.position.x,
-                        tf_target_zone_.pose.position.y, target_angle, 120000)){
+                        tf_target_zone_.pose.position.y, tf_target_zone_.pose.orientation.x, 120000)){
                         if(!FestinoNavigation::getClose(tf_target_zone_.pose.position.x,
-                        tf_target_zone_.pose.position.y, target_angle, 120000)){
+                        tf_target_zone_.pose.position.y, tf_target_zone_.pose.orientation.x, 120000)){
                             ROS_ERROR("Navigation to zone %s failed", target_zone_.c_str());
                         }else{
                             state_ = SM_WAIT_AT_ZONE;
@@ -296,7 +301,9 @@ public:
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "zone_navigation_action_server");
+    ros::NodeHandle nh;
     
+    FestinoNavigation::setNodeHandle(&nh);
     NavigateToZoneActionServer server("zone_navigation");
     ros::spin();
     

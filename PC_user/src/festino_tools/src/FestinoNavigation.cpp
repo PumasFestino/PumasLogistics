@@ -372,6 +372,7 @@ void FestinoNavigation::startGetClose(std::string location)
 
 bool FestinoNavigation::getClose(float x, float y, float angle, int timeOut_ms)
 {
+    std::cout << "Get Close" << std::endl;
     FestinoNavigation::startGetClose(x,y,angle);
     return FestinoNavigation::waitForGlobalGoalReached(timeOut_ms);
 }

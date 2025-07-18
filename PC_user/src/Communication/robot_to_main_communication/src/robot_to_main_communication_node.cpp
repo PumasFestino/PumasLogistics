@@ -11,7 +11,7 @@
 #include<arpa/inet.h> 
 
 #define TCPPORT 9002
-#define SERVER_IP "192.168.0.101"
+#define SERVER_IP "192.168.0.255"
 
 int client_fd;
 char buffer[50];
@@ -23,7 +23,7 @@ std::vector<std::string> tokens;
 // Instrucciones para probar
 std::vector<std::string> demo_instructions = {
     "move CS C_Z56 45",
-    "move BS C_Z35 0",
+    "move BS C_Z34 0",
     "move RS C_Z22 90"
 };
 

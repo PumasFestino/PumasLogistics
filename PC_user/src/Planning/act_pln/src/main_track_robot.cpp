@@ -168,7 +168,8 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
 	            std::cout << "I am ready for the main track challenge" << std::endl;
                 
-	    	    state = SM_WAIT_FOR_ZONES;
+	    	    //state = SM_WAIT_FOR_ZONES;
+	    	    state = SM_WAIT_FOR_INSTRUCTION;
 	    		break;
 
             case SM_WAIT_FOR_ZONES:
@@ -194,7 +195,7 @@ int main(int argc, char** argv){
 	    	case SM_MOVE:
 	    		std::cout << "State machine: SM_MOVE" << std::endl;
                 request = false;
-                                    std::cout << "HDP -- " << instructionTokens[4] << std::endl;
+                std::cout << "HDP -- " << instructionTokens[4] << std::endl;
 
                 if (instructionTokens[4] != "")
                 { 
@@ -206,7 +207,7 @@ int main(int argc, char** argv){
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
 
-                //FestinoTask::navigate("instructionTokens[2]");
+                FestinoTask::navigate(instructionTokens[2]);
 	    		break;
 
             case SM_ALIGN:

@@ -53,12 +53,12 @@
 //#define HOST "localhost"
 
 //ROBOCUP
-#define HOST "192.168.100.111"//"172.26.255.255"
+#define HOST "192.168.0.255"//"172.26.255.255"
 
 
 //#define HOST "172.23.134.255"
-#define TEAM_COLOR "MAGENTA"
-//#define TEAM_COLOR "CYAN"
+//#define TEAM_COLOR "MAGENTA"
+#define TEAM_COLOR "CYAN"
 #define TEAM_NAME "Pumas"
 
 //robot 1
