@@ -48,10 +48,12 @@ void zoneCallback(const std_msgs::String::ConstPtr& msg)
 bool handle_instruction(robot_to_main_communication::InstructionService::Request &req,
 robot_to_main_communication::InstructionService::Response &res)
 {
-   /* int valread = 0;
+    int valread = 0;
+    std::string command = req.request;
+
     std::stringstream ss;
 
-    write(client_fd, "n", 1);
+    write(client_fd, command.c_str(), command.length());
     valread = read(client_fd, buffer, sizeof(buffer));
 
     ss << buffer;
@@ -59,13 +61,14 @@ robot_to_main_communication::InstructionService::Response &res)
     res.instruction = ss.str();
 
     memset(&buffer, 0, sizeof(buffer));         // Limpia el buffer
-    return true;*/
-    res.instruction = demo_instructions[instruction_index];
+    return true;
+
+    /*res.instruction = demo_instructions[instruction_index];
     instruction_index++;
 
     if (instruction_index == demo_instructions.size()){
         instruction_index = 0;
-    }
+    }*/
 
     return true;
 }

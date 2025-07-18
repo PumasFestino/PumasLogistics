@@ -4,7 +4,7 @@
 #include<arpa/inet.h> 
 
 #define TCPPORT 9002
-#define SERVER_IP "192.168.0.101"
+#define SERVER_IP "192.168.100.111"
 //#define SERVER_IP "192.168.1.106"
 //#define SERVER_IP "192.168.1.163"
 
@@ -36,7 +36,7 @@ printf("request received \n");
 
         //write(client_fd, instruction.str(), sizeof(instruction));//ask server for next instruction
         //std::cout << " ask next instruction " << std::endl;
-        write(client_fd, "n", 1);
+        write(client_fd, "z", 1);
         valread = read(client_fd, buffer, sizeof(buffer));
 
         printf("Server instruction: %s\n", buffer);
