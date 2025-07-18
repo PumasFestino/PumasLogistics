@@ -1,8 +1,10 @@
 <launch>  
-  <arg name="static_map_file"  default="$(find config_files)/maps/logistics-2025.yaml"/>
+  <arg name="map_name" default="logistics_2025.yaml"/>
+  <arg name="static_map_file" default="$(find config_files)/maps/$(arg map_name)"/>
   <arg name="prohibition_map_file"  default="$(find config_files)/prohibition_maps/logistics-2025-blocked.yaml"/>
-  <arg name="initial_pose_x" default="2.529"/>
-  <arg name="initial_pose_y" default="-0.122"/>
+    
+  <arg name="initial_pose_x" default="3.872"/>
+  <arg name="initial_pose_y" default="-0.447"/>
   <arg name="initial_pose_a" default="0.0"/>
   <arg name="laser_scan_topic" default="/scan"/>
   <arg name="point_cloud_topic" default="/camera/depth_registered/points"/>
@@ -33,10 +35,9 @@
     <param name="control_alpha" value="0.4"/>
     <param name="control_beta" value="0.15"/>
     <param name="cmd_vel_name" value="$(arg cmd_vel_name)"/>
-    <!--param name="/base_link_name" value="$(arg /base_link_name)"/-->
   </node>
 
-  <!--node name="obs_detector"  pkg="obstacle_detector"  type="obs_detect_node"  output="screen">
+  <node name="obs_detector"  pkg="obstacle_detector"  type="obs_detect_node"  output="screen">
     <param name="laser_scan_topic" value="$(arg laser_scan_topic)"/>
     <param name="use_lidar" value="$(arg use_lidar)"/>
     <param name="use_sonars" value="$(arg use_sonars)"/>
@@ -53,11 +54,10 @@
     <param name="max_y" value="$(arg max_y)"/>
     <param name="min_y" value="$(arg min_y)"/>
     <param name="max_z" value="$(arg max_z)"/>
-    <param name="min_z" value="$(arg min_z)"/-->
-    <!--param name="/base_link_name" value="$(arg /base_link_name)"/-->
-  <!--/node-->
+    <param name="min_z" value="$(arg min_z)"/>
+  </node>
 
-  <!--node name="map_augmenter"  pkg="map_augmenter"  type="map_augmenter_node"  output="screen">
+  <node name="map_augmenter"  pkg="map_augmenter"  type="map_augmenter_node"  output="screen">
     <param name="use_lidar" value="$(arg use_lidar)"/>
     <param name="use_sonars" value="$(arg use_sonars)"/>
     <param name="use_point_cloud" value="$(arg use_point_cloud)"/>
@@ -72,22 +72,18 @@
     <param name="max_y" value="$(arg max_y)"/>
     <param name="min_y" value="$(arg min_y)"/>
     <param name="max_z" value="$(arg max_z)"/>
-    <param name="min_z" value="$(arg min_z)"/-->
-    <!--param name="/base_link_name" value="$(arg /base_link_name)"/-->
-    <!--###decay_factor-->
+    <param name="min_z" value="$(arg min_z)"/>
+  </node>
 
-  <!--/node-->
-
-  <!--node name="mvn_pln"  pkg="mvn_pln"  type="mvn_pln_node"  output="screen">
+  <node name="mvn_pln"  pkg="mvn_pln"  type="mvn_pln_node"  output="screen">
     <remap from="/nav_control/goal" to="/move_base_simple/goal"/>
-    <param name="patience" value="True"/-->
-    <!--param name="/base_link_name" value="$(arg /base_link_name)"/-->
-  <!--/node-->
+    <param name="patience" value="True"/>
+  </node>
 
-  <!--node name="prohibition_map_server" pkg="map_server" type="map_server" output="screen" args="$(arg prohibition_map_file)">
+  <node name="prohibition_map_server" pkg="map_server" type="map_server" output="screen" args="$(arg prohibition_map_file)">
     <remap from="/static_map" to="/prohibition_map"/>
     <remap from="/map" to="/prohibition_layer_map"/>
-  </node-->
+  </node>
  
   <node name="map_server" pkg="map_server" type="map_server" output="screen" args="$(arg static_map_file)"/>
 
@@ -100,18 +96,11 @@
     <param name="odom_alpha3" value="0.01"/>
     <param name="odom_alpha4" value="0.01"/>
     <param name="odom_alpha5" value="0.01"/>
-    <param name="update_min_a" value="0.1"/>
+    <param name="update_min_a" value="0.5"/>
+    <param name="update_min_d" value="0.3"/>
     <param name="laser_min_range" value="0.3"/>
     <param name="odom_model_type" value="omni-corrected"/>
- 
   </node>
-
-<!--node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
-
-  </node>
-
-<param name="robot_description" command="$(find xacro)/xacro '$(find robotino_description)/robotino_kinect_arm.xacro'" /-->
-
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation.rviz"/>
 
   <!--node name="panic_stop" pkg="act_pln" type="panic_stop.py">

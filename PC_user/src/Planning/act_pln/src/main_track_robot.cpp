@@ -60,6 +60,7 @@ std::vector<std::string> instructionTokens;
 // Receive instructions from the planner
 void request_instruction(){
     std::cout << "Request a new instruction" << std::endl;	
+    instructionTokens.clear();
 
     if(FestinoCommunication::getInstruction(&instructionTokens)){
         std::cout << "The instruction is: " <<  instructionTokens[0] << std::endl;	
@@ -160,28 +161,6 @@ int main(int argc, char** argv){
     FestinoCommunication::setNodeHandle(&n);
     FestinoTask::setNodeHandle(&n);
 
-    // Services
-    ros::ServiceClient aruco_client = n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
-    img_proc::Find_tag_Srv aruco_srv;
-
-    // cmd_vel
-    geometry_msgs::Twist vel;
-
-    // Integer for the gripper node(Review)
-    std_msgs::Int32 manipulator_var;
-
-    // String with machine instruction
-    std_msgs::String machine_instruction;
-
-    // String to save the current zone 
-    std::string zone_buffer = "M_Z01";
-
-    // String to save the current section 
-    std::string section_buffer = "indef";
-
-    // String to save the current station
-    std::string station_buffer = "NA";
-
 	while(ros::ok() && !fail && !success){
 	    switch(state){
 			case SM_INIT:
@@ -201,9 +180,10 @@ int main(int argc, char** argv){
 	    	case SM_MOVE:
 	    		std::cout << "State machine: SM_MOVE" << std::endl;
                 request = false;
+                                    std::cout << "HDP -- " << instructionTokens[4] << std::endl;
 
                 if (instructionTokens[4] != "")
-                {
+                { 
                     instructionTokens.at(2) = instructionTokens.at(2) + "_" + instructionTokens[4];
                     state = SM_ALIGN;
                 }
@@ -212,7 +192,7 @@ int main(int argc, char** argv){
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
 
-                FestinoTask::navigate(instructionTokens[2]);
+                //FestinoTask::navigate("instructionTokens[2]");
 	    		break;
 
             case SM_ALIGN:
