@@ -160,11 +160,6 @@ int main(int argc, char** argv){
     FestinoCommunication::setNodeHandle(&n);
     FestinoTask::setNodeHandle(&n);
 
-    // Topics
-    ros::Publisher pubMachineInst   = n.advertise<std_msgs::String>("/machine_instruction_msg", 1000);  // revisar con Sergio
-    ros::Publisher pubManipulator   = n.advertise<std_msgs::Int32 >("manipulator/action", 1000);        // modificar por brazo de Miguel
-    ros::Publisher pubVel           = n.advertise<geometry_msgs::PoseStamped>  ("/cmd_vel", 1000);      //QUITAAAAR
-
     // Services
     ros::ServiceClient aruco_client = n.serviceClient<img_proc::Find_tag_Srv>("/vision/find_tag/point_stamped");
     img_proc::Find_tag_Srv aruco_srv;
@@ -208,7 +203,7 @@ int main(int argc, char** argv){
                 request = false;
 
                 if (instructionTokens[4] != "")
-                { 
+                {
                     instructionTokens.at(2) = instructionTokens.at(2) + "_" + instructionTokens[4];
                     state = SM_ALIGN;
                 }
@@ -217,7 +212,7 @@ int main(int argc, char** argv){
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
 
-                //FestinoTask::navigate("instructionTokens[2]");
+                FestinoTask::navigate(instructionTokens[2]);
 	    		break;
 
             case SM_ALIGN:

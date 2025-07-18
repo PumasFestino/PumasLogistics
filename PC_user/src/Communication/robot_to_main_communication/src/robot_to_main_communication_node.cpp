@@ -22,9 +22,9 @@ std::vector<std::string> tokens;
 
 // Instrucciones para probar
 std::vector<std::string> demo_instructions = {
-    "move CS C_Z22 45",
-    "move BS M_Z11 0",
-    "move RS CS_Z34 90"
+    "move CS C_Z56 45",
+    "move BS C_Z35 0",
+    "move RS C_Z22 90"
 };
 
 int instruction_index = 0;

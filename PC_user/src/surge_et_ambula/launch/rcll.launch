@@ -9,7 +9,7 @@
     <node name="aruco_tf_srv" pkg="img_proc" type="aruco_tf_srv" output="screen" />
 
     <!--   Communication   -->
-    <!--<include file="$(find robot_to_main_communication)/launch/robot_to_main_communication.launch" /> -->
+    <include file="$(find robot_to_main_communication)/launch/robot_to_main_communication.launch" />
     <!-- <node name="refbox_comm_node" pkg="ref_box_comm" type="refbox_comm_node" output="screen"/> -->
 
     <!--   Move   -->
