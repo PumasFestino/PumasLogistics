@@ -86,10 +86,10 @@ robot_to_main_communication::InstructionService::Response &res)
 // Servicio que devuelve una zona por cada solicitud "true"
 bool handle_zone(robot_to_main_communication::ZoneService::Request &req,
 robot_to_main_communication::ZoneService::Response &res)
-{
+{ 
     if (req.request == "true") {
         if (current_zone_index < zone_queue.size()) {
-            res.zone = zone_queue[current_zone_index++];
+            res.zone = "move CS" + zone_queue[current_zone_index++] + zone_queue[current_zone_index++];
             ROS_INFO("Enviando zona: %s", res.zone.c_str());
         } else {
             res.zone = "DONE"; // Ya no hay más zonas
