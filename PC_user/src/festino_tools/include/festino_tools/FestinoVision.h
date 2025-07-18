@@ -3,6 +3,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <yolo_lid/PointArray.h>
+#include <map>
+#include <mutex>
 
 // ----- ROS Libraries ----- //
 #include <ros/ros.h>
@@ -48,11 +51,9 @@ private:
     //Logistics camera taks
     static ros::ServiceClient cltCameraTask;
 
-    static ros::Subscriber subCentroidPiece;
-    static geometry_msgs::Point _centroidPiece;
-
-    static float _centroid_x;
-    static float _centroid_y;
+    static ros::Subscriber subCentroidArray;
+    static std::map<std::string, geometry_msgs::Point> classified_centroids;
+    static std::mutex data_mutex_;
 
 
 public:
@@ -75,7 +76,7 @@ public:
     static std::string enableQRDetect(bool enabled);
 
     //Logistics camera task
-    static void callbackCentroid(const geometry_msgs::Point::ConstPtr& msg);
+    static void callbackCentroidArray(const yolo_lid::PointArray::ConstPtr& msg);
     static std::pair<double, double> find(std::string thing);
     static float findBand();
     static float centerBand();

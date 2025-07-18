@@ -1,7 +1,7 @@
 <launch>
     <!--   Vision   -->
-    <include file="$(find freenect_launch)/launch/freenect.launch" />
-    <node name="move_kinect" pkg="kinect_move" type="move_kinect.py" output="screen" />
+    <!-- <include file="$(find freenect_launch)/launch/freenect.launch" /> -->
+    <!-- <node name="move_kinect" pkg="kinect_move" type="move_kinect.py" output="screen" /> -->
     <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="camera" value="realsense"/>
     </include>

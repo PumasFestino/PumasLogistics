@@ -116,6 +116,9 @@ public:
             {
                 case SM_INIT:
                     current_state = "SM_INIT";
+
+                    FestinoHardware::move_gripper((action_manip_ == "take" || action_manip_ == "takep") ? !gripper_status : gripper_status);
+                    
                     state_ = (action_manip_ == "takep" || action_manip_ == "dropp") ? SM_MOVE_TO_PLATFORM : SM_NOT_MOVE_TO_PLATFORM;
                     break;
 
