@@ -21,7 +21,7 @@ bool FestinoCommunication::setNodeHandle(ros::NodeHandle* nh)
     return true;
 }
 
-bool FestinoCommunication::getInstruction(std::vector<std::string>* tokens, string command)
+bool static bool FestinoCommunication::getInstruction(std::vector<std::string>* tokens, std::string command)
 {
     robot_to_main_communication::InstructionService srv;
     srv.request.request = command;
@@ -47,7 +47,7 @@ bool FestinoCommunication::getInstruction(std::vector<std::string>* tokens, stri
             // Rellena o recorta a 5 elementos
             while (temp_tokens.size() < 5)
                 temp_tokens.push_back("");
-            
+
             if (temp_tokens.size() > 5)
                 temp_tokens.resize(5);
         }
