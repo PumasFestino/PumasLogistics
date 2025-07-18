@@ -458,7 +458,6 @@ void FestinoNavigation::modifyMap(std::string zones)
 {
     std_msgs::String msg;
     msg.data = zones;
-    //FestinoNavigation::_isGlobalGoalReached = false;
     pubModMap.publish(msg);
     ros::spinOnce();
 }
