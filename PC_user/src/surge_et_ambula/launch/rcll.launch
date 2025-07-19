@@ -2,6 +2,8 @@
     <!--   Vision   -->
     <!-- <include file="$(find freenect_launch)/launch/freenect.launch" /> -->
     <!-- <node name="move_kinect" pkg="kinect_move" type="move_kinect.py" output="screen" /> -->
+    <arg name="color_team" default="CYAN"/>
+
     <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="camera" value="realsense"/>
     </include>
@@ -10,12 +12,15 @@
 
     <!--   Communication   -->
     <include file="$(find robot_to_main_communication)/launch/robot_to_main_communication.launch" />
-    <node name="refbox_comm_node" pkg="refbox_comm" type="refbox_comm_node" output="screen"/>
+    <!--node name="refbox_comm_node" pkg="refbox_comm" type="refbox_comm_node" output="screen"/-->
 
     <!--   Move   -->
     <node name="move_base" pkg="simple_move" type="move_base" output="screen" />
     <node name="aling_with_line" pkg="simple_move" type="aling_with_line" output="screen" />
-    <node name="mod_map_node" pkg="movement_functions" type="mod_map_node" output="screen" />
+
+    <node name="mod_map_node" pkg="movement_functions" type="mod_map_node" output="screen" >
+        <param name="color_team" value="$(arg color_team)" />
+    </node>
 
     <!--include file="$(find movement_functions)/launch/logisticsZones_JM.launch" /-->
     <!--node name="reload_amcl_service" pkg="movement_functions" type="reload_amcl_service"/-->

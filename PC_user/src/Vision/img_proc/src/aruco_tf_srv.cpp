@@ -3,298 +3,340 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/point_cloud2_iterator.h>
 #include <geometry_msgs/TransformStamped.h>
-#include <geometry_msgs/Point.h>
-#include <tf2_ros/static_transform_broadcaster.h> 
-#include <tf2_ros/transform_broadcaster.h> 
-#include <tf2_ros/transform_listener.h>          
-#include <tf2_ros/buffer.h>                      
-#include <tf2/transform_datatypes.h>   
+#include <geometry_msgs/PointStamped.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/static_transform_broadcaster.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
-#include "img_proc/Tag_with_tf.h"
 #include <Eigen/Dense>
+#include <queue>
+#include "img_proc/Tag_with_tf.h"
 
 class ArucoDistanceTF
 {
-    private:
-            ros::NodeHandle nh_;
-            image_transport::ImageTransport it_;
-            image_transport::Subscriber image_sub_;
-            ros::Subscriber pointcloud_sub_;
-            ros::ServiceServer service_;
-            tf2_ros::TransformBroadcaster tf_broadcaster_;
+    ros::NodeHandle nh_;
+    image_transport::ImageTransport it_;
+    image_transport::Subscriber image_sub_;
+    ros::Subscriber pointcloud_sub_, scan_sub_;
+    ros::ServiceServer service_;
+    tf2_ros::Buffer tf_buffer_;
+    tf2_ros::TransformListener tf_listener_;
+    tf2_ros::StaticTransformBroadcaster static_broadcaster_;
 
-            cv::Ptr<cv::aruco::Dictionary> aruco_dict_;
-            cv::Ptr<cv::aruco::DetectorParameters> aruco_params_;
+    cv::Ptr<cv::aruco::Dictionary> aruco_dict_;
+    cv::Ptr<cv::aruco::DetectorParameters> aruco_params_;
 
-            sensor_msgs::PointCloud2::ConstPtr latest_pointcloud_;
-            cv::Mat latest_image_;
-            
-            std::vector<std::string> mps_names;
-            bool success;
+    sensor_msgs::PointCloud2::ConstPtr latest_pointcloud_;
+    cv::Mat latest_image_;
+    std::vector<std::pair<double, double>> laser_points_;
 
+    std::vector<std::string> mps_names;
+    bool success;
 
-    public:
-            ArucoDistanceTF() : nh_("~"), it_(nh_), success(false)
+public:
+    ArucoDistanceTF() : nh_("~"), it_(nh_), tf_listener_(tf_buffer_), success(false)
+    {
+        aruco_dict_ = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_ARUCO_ORIGINAL);
+        aruco_params_ = cv::aruco::DetectorParameters::create();
+
+        image_sub_ = it_.subscribe("/camera/rgb/image_color", 1, &ArucoDistanceTF::imageCallback, this);
+        pointcloud_sub_ = nh_.subscribe("/camera/depth/points", 1, &ArucoDistanceTF::pointCloudCallback, this);
+        scan_sub_ = nh_.subscribe("/scan", 1, &ArucoDistanceTF::scanCallback, this);
+        service_ = nh_.advertiseService("/vision/find_tag", &ArucoDistanceTF::getArucoTFService, this);
+
+        ROS_INFO("ArucoDistanceTF node initialized.");
+    }
+
+    void imageCallback(const sensor_msgs::ImageConstPtr& msg)
+    {
+        try {
+            latest_image_ = cv_bridge::toCvShare(msg, "bgr8")->image;
+        } catch (cv_bridge::Exception& e) {
+            ROS_ERROR("Image conversion failed: %s", e.what());
+        }
+    }
+
+    void pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
+    {
+        latest_pointcloud_ = msg;
+    }
+
+    void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
+    {
+        laser_points_.clear();
+        for (size_t i = 0; i < msg->ranges.size(); ++i)
+        {
+            float range = msg->ranges[i];
+            if (range > msg->range_min && range < msg->range_max)
             {
-                aruco_dict_ = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_ARUCO_ORIGINAL);
-                aruco_params_ = cv::aruco::DetectorParameters::create();
-
-                image_sub_ = it_.subscribe("/camera/rgb/image_color", 1, &ArucoDistanceTF::imageCallback, this);
-                pointcloud_sub_ = nh_.subscribe("/camera/depth/points", 1, &ArucoDistanceTF::pointCloudCallback, this);
-                service_ = nh_.advertiseService("/vision/find_tag", &ArucoDistanceTF::getArucoTFService, this);;
-                
-                std::cout << "Aruco with TF Service --- Soft by Joshua M" << std::endl;
+                double angle = msg->angle_min + i * msg->angle_increment;
+                double x = range * cos(angle);
+                double y = range * sin(angle);
+                laser_points_.emplace_back(x, y);
             }
+        }
+    }
 
-            void imageCallback(const sensor_msgs::ImageConstPtr& msg)
+    bool getArucoTFService(img_proc::Tag_with_tf::Request &req, img_proc::Tag_with_tf::Response &res)
+    {
+        res.success = false;
+        if (req.is_find_tag_enabled)
+        {
+            process();
+            res.success = success;
+            res.mps_name = mps_names.empty() ? "" : mps_names[0];
+        }
+        return true;
+    }
+
+    geometry_msgs::Point getPointFromCloud(float u, float v)
+    {
+        geometry_msgs::Point point;
+        if (!latest_pointcloud_) return point;
+
+        int width = latest_pointcloud_->width;
+        int height = latest_pointcloud_->height;
+
+        if (u < 0 || v < 0 || u >= width || v >= height) return point;
+
+        int index = static_cast<int>(v) * width + static_cast<int>(u);
+
+        sensor_msgs::PointCloud2ConstIterator<float> iter_x(*latest_pointcloud_, "x");
+        sensor_msgs::PointCloud2ConstIterator<float> iter_y(*latest_pointcloud_, "y");
+        sensor_msgs::PointCloud2ConstIterator<float> iter_z(*latest_pointcloud_, "z");
+
+        for (int i = 0; i < index; ++i) {
+            ++iter_x; ++iter_y; ++iter_z;
+        }
+
+        point.x = *iter_z;
+        point.y = *iter_x;
+        point.z = *iter_y;
+        
+        point.y = -point.y;
+        point.x =  point.x;
+        point.z = -point.z;
+        return point;
+    }
+
+    geometry_msgs::Point transformPointToLaser(const geometry_msgs::Point& p)
+    {
+        geometry_msgs::PointStamped in, out;
+        in.header.frame_id = "camera_link";
+        in.header.stamp = ros::Time(0);
+        in.point = p;
+        try {
+            tf_buffer_.transform(in, out, "laser_link", ros::Duration(1.0));
+            return out.point;
+        } catch (tf2::TransformException& ex) {
+            ROS_WARN("TF transform failed: %s", ex.what());
+            geometry_msgs::Point invalid;
+            invalid.x = invalid.y = invalid.z = std::numeric_limits<double>::quiet_NaN();
+            return invalid;
+        }
+    }
+
+    std::vector<std::vector<std::pair<double, double>>> clusterLaserPoints(double dist = 0.05, int min_pts = 5)
+    {
+        std::vector<std::vector<std::pair<double, double>>> clusters;
+        std::vector<bool> visited(laser_points_.size(), false);
+
+        for (size_t i = 0; i < laser_points_.size(); ++i)
+        {
+            if (visited[i]) continue;
+            std::vector<std::pair<double, double>> cluster;
+            std::queue<size_t> q;
+            q.push(i);
+            visited[i] = true;
+
+            while (!q.empty())
             {
-                try
-                {
-                    latest_image_ = cv_bridge::toCvShare(msg, "bgr8")->image;
-                }
-                catch (cv_bridge::Exception& e)
-                {
-                    ROS_ERROR("Error to convert image: %s", e.what());
-                }
-            }
+                size_t idx = q.front(); q.pop();
+                cluster.push_back(laser_points_[idx]);
 
-            void pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg)
-            {
-                latest_pointcloud_ = msg;
-            }
-
-
-            bool getArucoTFService(img_proc::Tag_with_tf::Request &req, img_proc::Tag_with_tf::Response &res)
-            {
-                
-                res.success = false; 
-                if (req.is_find_tag_enabled)
+                for (size_t j = 0; j < laser_points_.size(); ++j)
                 {
-                    process();
-                    res.success = success;
-                    res.mps_name = mps_names.empty() ? "" : mps_names[0];
-                }
-                return true;
-            }
-
-            void process()
-            {
-                success = false;
-                if (latest_image_.empty() || !latest_pointcloud_)
-                {
-                    ROS_INFO("Waiting image data and point cloud...");
-                    return;
-                }
-            
-                cv::Mat gray;
-                cv::cvtColor(latest_image_, gray, cv::COLOR_BGR2GRAY);
-            
-                std::vector<std::vector<cv::Point2f>> corners;
-                std::vector<int> ids;
-                cv::aruco::detectMarkers(gray, aruco_dict_, corners, ids, aruco_params_);
-            
-                geometry_msgs::Point closest_centroid;
-                tf2::Quaternion closest_q;
-                double min_distance = std::numeric_limits<double>::max();
-                int closest_id = -1;
-            
-                if (!ids.empty())
-                {
-                    // ----- Iterar por cada marcador detectado ----- //
-                    for (size_t i = 0; i < ids.size(); ++i)
+                    if (!visited[j])
                     {
-                        std::vector<geometry_msgs::Point> plane_x;
-                        for (const auto& corner : corners[i])
-                            plane_x.push_back(getPointFromCloud(corner.x, corner.y));
-                    
-                        if (plane_x.size() == 4)
+                        double dx = laser_points_[idx].first - laser_points_[j].first;
+                        double dy = laser_points_[idx].second - laser_points_[j].second;
+                        if (std::hypot(dx, dy) < dist)
                         {
-                            // ----- Calcular el centroide del marcador ----- //
-                            geometry_msgs::Point centroid_3d;
-                            centroid_3d.x = (plane_x[0].x + plane_x[1].x + plane_x[2].x + plane_x[3].x) / 4.0;
-                            centroid_3d.y = (plane_x[0].y + plane_x[1].y + plane_x[2].y + plane_x[3].y) / 4.0;
-                            centroid_3d.z = (plane_x[0].z + plane_x[1].z + plane_x[2].z + plane_x[3].z) / 4.0;
-                        
-                            // ----- Calcular la orientación del plano ----- //
-                            Eigen::Vector3d v1(plane_x[1].x - plane_x[0].x, plane_x[1].y - plane_x[0].y, plane_x[1].z - plane_x[0].z);
-                            Eigen::Vector3d v2(plane_x[3].x - plane_x[0].x, plane_x[3].y - plane_x[0].y, plane_x[3].z - plane_x[0].z);
-                            Eigen::Vector3d normal = v1.cross(v2);
-                            normal.normalize();
-                            double yaw = atan2(normal.y(), normal.x());
-                        
-                            tf2::Quaternion q;
-                            q.setRPY(0, 0, yaw);
-                        
-                            // ----- Calcular la distancia al marcador ----- //
-                            double distance = std::sqrt(
-                                std::pow(centroid_3d.x, 2) +
-                                std::pow(centroid_3d.y, 2) +
-                                std::pow(centroid_3d.z, 2));
-                            
-                            if (distance < min_distance)
-                            {
-                                min_distance = distance;
-                                closest_centroid = centroid_3d;
-                                closest_q = q;
-                                closest_id = ids[i];
-                            }
-                        }
-                        else
-                        {
-                            ROS_WARN("Not enough corner points detected.");
+                            q.push(j);
+                            visited[j] = true;
                         }
                     }
-                
-                    // ----- Si se encontró el más cercano, publicarlo ----- //
-                    if (closest_id != -1)
-                    {
-                        publishTF(closest_centroid.x, closest_centroid.y, closest_centroid.z, closest_q, closest_id);
-                        mps_names.clear();
-                        mps_names.push_back(std::to_string(closest_id));
-                        success = true;
-                    }
-                }
-                else
-                {
-                    std::cout << "Aruco with TF Service --- No tag detected" << std::endl;
-                    success = false;
                 }
             }
 
-            geometry_msgs::Point getPointFromCloud(float u, float v)
+            if (cluster.size() >= min_pts)
+                clusters.push_back(cluster);
+        }
+
+        return clusters;
+    }
+
+    bool findBestLineFromClusters(const geometry_msgs::Point& ref, double& angle_out)
+    {
+        auto clusters = clusterLaserPoints();
+        double min_dist = std::numeric_limits<double>::max();
+        int best_inliers = 0;
+        double best_angle = 0.0;
+
+        for (const auto& cluster : clusters)
+        {
+            if (cluster.size() < 10) continue;
+
+            const int iterations = 50;
+            const double threshold = 0.02;
+            int best_cluster_inliers = 0;
+            double cluster_angle = 0.0;
+
+            for (int i = 0; i < iterations; ++i)
             {
-                geometry_msgs::Point point;
+                int a = rand() % cluster.size();
+                int b = rand() % cluster.size();
+                if (a == b) continue;
 
-                if (!latest_pointcloud_)
+                auto [x1, y1] = cluster[a];
+                auto [x2, y2] = cluster[b];
+                double dx = x2 - x1, dy = y2 - y1, norm = std::hypot(dx, dy);
+                if (norm == 0) continue;
+
+                double A = dy, B = -dx, C = dx * y1 - dy * x1;
+                int inliers = 0;
+                for (const auto& [x, y] : cluster)
                 {
-                    point.x = point.y = point.z = std::numeric_limits<float>::quiet_NaN();
-                    success = false;
-                    return point;
+                    double d = std::fabs(A * x + B * y + C) / norm;
+                    if (d < threshold) inliers++;
                 }
 
-                int width = latest_pointcloud_->width;
-                int height = latest_pointcloud_->height;
-
-                if (u < 0 || v < 0 || u >= width || v >= height)
+                if (inliers > best_cluster_inliers)
                 {
-                    ROS_WARN("Coordinates (%f, %f) are outside of point cloud", u, v);
-                    point.x = point.y = point.z = std::numeric_limits<float>::quiet_NaN();
-                    success= false;
-                    return point;
+                    best_cluster_inliers = inliers;
+                    cluster_angle = atan2(dy, dx);
                 }
-
-                int index = static_cast<int>(v) * width + static_cast<int>(u);
-
-                sensor_msgs::PointCloud2ConstIterator<float> iter_x(*latest_pointcloud_, "x");
-                sensor_msgs::PointCloud2ConstIterator<float> iter_y(*latest_pointcloud_, "y");
-                sensor_msgs::PointCloud2ConstIterator<float> iter_z(*latest_pointcloud_, "z");
-
-                for (int i = 0; i < index; ++i) {
-                    ++iter_x;
-                    ++iter_y;
-                    ++iter_z;
-                }
-
-                point.x = *iter_z;
-                point.y = *iter_x;
-                point.z = *iter_y;
-
-                point.y = -point.y;
-                point.x = point.x;
-                point.z = -point.z;
-                
-                return point;
             }
 
+            double cx = 0, cy = 0;
+            for (const auto& [x, y] : cluster) { cx += x; cy += y; }
+            cx /= cluster.size(); cy /= cluster.size();
+            double dist = std::hypot(ref.x - cx, ref.y - cy);
 
-            void publishTF_without_map(float x, float y, float z, const tf2::Quaternion& q, int marker_id)
+            if (best_cluster_inliers > 10 && dist < min_dist)
             {
-                static tf2_ros::StaticTransformBroadcaster static_broadcaster_;
-                
-                geometry_msgs::TransformStamped transform;
-                transform.header.stamp = ros::Time::now();
-                transform.header.frame_id = "camera_link";
-                transform.child_frame_id = "aruco_marker_" + std::to_string(marker_id);
-
-                transform.transform.translation.x = x;
-                transform.transform.translation.y = y;
-                transform.transform.translation.z = z;
-
-                transform.transform.rotation.x = q.x();
-                transform.transform.rotation.y = q.y();
-                transform.transform.rotation.z = q.z();
-                transform.transform.rotation.w = q.w();
-
-
-                //tf_broadcaster_.sendTransform(transform);
-                static_broadcaster_.sendTransform(transform);
-                
-                std::cout << "Publish TF for marker "<< marker_id <<" @ x: " << x << "; y: " << y << "; z:" << z << std::endl;
+                min_dist = dist;
+                best_inliers = best_cluster_inliers;
+                best_angle = cluster_angle;
             }
+        }
 
-            void publishTF(float x, float y, float z, const tf2::Quaternion& q, int marker_id)
-            {
-                static tf2_ros::StaticTransformBroadcaster static_broadcaster_;
-                tf2_ros::Buffer tf_buffer;
-                tf2_ros::TransformListener tf_listener(tf_buffer);
+        if (best_inliers > 10) {
+            angle_out = best_angle;
+            return true;
+        }
+        return false;
+    }
 
-                try
-                {
-                    // Obtener la transformada de "map" a "camera_link"
-                    geometry_msgs::TransformStamped map_to_camera;
-                    map_to_camera = tf_buffer.lookupTransform("map", "camera_link", ros::Time(0), ros::Duration(1.0));
+    void publishTF(const geometry_msgs::Point& point, const tf2::Quaternion& q, int marker_id)
+    {
+        try {
+            geometry_msgs::TransformStamped tf = tf_buffer_.lookupTransform("map", "camera_link", ros::Time(0), ros::Duration(1.0));
 
-                    // Aplicar la transformación a las coordenadas
-                    tf2::Vector3 marker_in_camera(x, y, z);
-                    tf2::Transform transform_map_to_camera;
-                    tf2::fromMsg(map_to_camera.transform, transform_map_to_camera);
+            tf2::Vector3 pos(point.x, point.y, point.z);
+            tf2::Transform T_cam;
+            tf2::fromMsg(tf.transform, T_cam);
+            tf2::Vector3 pos_map = T_cam * pos;
 
-                    tf2::Vector3 marker_in_map = transform_map_to_camera * marker_in_camera;
+            geometry_msgs::TransformStamped tf_out;
+            tf_out.header.stamp = ros::Time::now();
+            tf_out.header.frame_id = "map";
+            tf_out.child_frame_id = "aruco_marker_" + std::to_string(marker_id);
+            tf_out.transform.translation.x = pos_map.x();
+            tf_out.transform.translation.y = pos_map.y();
+            tf_out.transform.translation.z = pos_map.z();
+            tf_out.transform.rotation = tf2::toMsg(q);
 
-                    // Crear el mensaje de transformada estática
-                    geometry_msgs::TransformStamped transform;
-                    transform.header.stamp = ros::Time::now();
-                    transform.header.frame_id = "map";
-                    transform.child_frame_id = "aruco_marker_" + std::to_string(marker_id);
+            static_broadcaster_.sendTransform(tf_out);
 
-                    transform.transform.translation.x = marker_in_map.x();
-                    transform.transform.translation.y = marker_in_map.y();
-                    transform.transform.translation.z = marker_in_map.z();
+            ROS_INFO("Published static TF for marker %d", marker_id);
+        } catch (tf2::TransformException& ex) {
+            ROS_WARN("TF error in publishTF: %s", ex.what());
+        }
+    }
 
-                    transform.transform.rotation.x = q.x();
-                    transform.transform.rotation.y = q.y();
-                    transform.transform.rotation.z = q.z();
-                    transform.transform.rotation.w = q.w();
-                    
-                    // Publicar la transformada estática
-                    static_broadcaster_.sendTransform(transform);
+    void process()
+    {
+        success = false;
+        if (latest_image_.empty() || !latest_pointcloud_) return;
 
-                    std::cout << "Publish static TF for marker " << marker_id 
-                            << " @ x: " << marker_in_map.x()
-                            << "; y: " << marker_in_map.y()
-                            << "; z: " << marker_in_map.z()
-                            << " referenced to map." << std::endl;
-                    success = true;
-                }
-                catch (tf2::TransformException& ex)
-                {
-                    ROS_WARN("Could not transform from 'map' to 'camera_link': %s", ex.what());
-                    success = false;
-                }
+        cv::Mat gray;
+        cv::cvtColor(latest_image_, gray, cv::COLOR_BGR2GRAY);
+        std::vector<std::vector<cv::Point2f>> corners;
+        std::vector<int> ids;
+        cv::aruco::detectMarkers(gray, aruco_dict_, corners, ids, aruco_params_);
+
+        if (ids.empty()) {
+            ROS_WARN("No ArUco markers detected.");
+            return;
+        }
+
+        geometry_msgs::Point closest;
+        tf2::Quaternion orientation;
+        double min_dist = std::numeric_limits<double>::max();
+        int closest_id = -1;
+
+        for (size_t i = 0; i < ids.size(); ++i)
+        {
+            std::vector<geometry_msgs::Point> pts;
+            for (const auto& c : corners[i])
+                pts.push_back(getPointFromCloud(c.x, c.y));
+
+            bool valid = std::all_of(pts.begin(), pts.end(), [](const geometry_msgs::Point& p){
+                return std::isfinite(p.x) && std::isfinite(p.y) && std::isfinite(p.z);
+            });
+            if (!valid) continue;
+
+            geometry_msgs::Point centroid;
+            for (const auto& p : pts) {
+                centroid.x += p.x; centroid.y += p.y; centroid.z += p.z;
             }
+            centroid.x /= 4.0; centroid.y /= 4.0; centroid.z /= 4.0;
+
+            double dist = std::sqrt(centroid.x*centroid.x + centroid.y*centroid.y + centroid.z*centroid.z);
+            if (dist < min_dist) {
+                closest = centroid;
+                closest_id = ids[i];
+                min_dist = dist;
+            }
+        }
+
+        if (closest_id == -1) return;
+
+        orientation.setRPY(0, 0, 0); // fallback
+
+        geometry_msgs::Point closest_laser = transformPointToLaser(closest);
+        double corrected_yaw;
+        if (std::isfinite(closest_laser.x) && findBestLineFromClusters(closest_laser, corrected_yaw))
+        {
+            orientation.setRPY(0, 0, corrected_yaw);
+            ROS_INFO("Yaw corrected with LaserScan: %.3f", corrected_yaw);
+        }
+
+        publishTF(closest, orientation, closest_id);
+        mps_names = {std::to_string(closest_id)};
+        success = true;
+    }
 };
 
-
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     ros::init(argc, argv, "aruco_distance_tf_service");
     ArucoDistanceTF node;
-    ros::Rate rate(100000);
-
     ros::spin();
     return 0;
 }

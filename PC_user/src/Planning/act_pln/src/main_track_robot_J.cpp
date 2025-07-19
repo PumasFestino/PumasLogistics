@@ -17,8 +17,6 @@
 #include "actionlib_msgs/GoalStatus.h"
 #include <algorithm>
 
-//Para encontrar aruco
-#include "img_proc/Find_tag_Srv.h"
 
 //Festino Tools
 #include "festino_tools/FestinoHRI.h"
@@ -193,7 +191,7 @@ int main(int argc, char** argv){
                 instructionTokens.clear();
                 if (FestinoCommunication::getInstruction(&instructionTokens,"z")){
                     FestinoNavigation::modifyMap(instructionTokens[0]);
-                    ros::Duration(20, 0).sleep();
+                    ros::Duration(35, 0).sleep();
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
                 else
@@ -223,9 +221,7 @@ int main(int argc, char** argv){
                     state = SM_WAIT_FOR_INSTRUCTION;
                 }
 
-                //FestinoTask::navigate(instructionTokens[2]);
-                transform_zone(instructionTokens[2]);
-                navigate_to_location(tf_target_zone);
+                FestinoTask::navigate(instructionTokens[2]);
 	    		break;
 
             case SM_ALIGN:
@@ -233,7 +229,7 @@ int main(int argc, char** argv){
                 request = false;
 
                 FestinoNavigation::alingWithLine(true);
-                FestinoNavigation::move_base(1, 0, 0.1, 0.80);
+                FestinoNavigation::move_base(1, 0, 0.1, 1.0);
                 FestinoNavigation::alingWithLine(true);
                 state = SM_WAIT_FOR_INSTRUCTION;
                 break;

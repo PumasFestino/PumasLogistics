@@ -65,7 +65,7 @@ std::vector<std::string> demo_instructions = {
     "move CS M_Z55 0"
 };
 
-std::string demo_zones = "M_Z45 0 M_Z53 90 M_Z12 90";
+std::string demo_zones = "Z45 0 Z53 90 Z12 90";
 
 int instruction_index = 0;
 
@@ -157,7 +157,7 @@ robot_to_main_communication::ZoneService::Response &res)
 
 int main(int argc, char **argv)
 {
-
+/*
     int status;
     struct sockaddr_in serv_addr;
     if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -184,7 +184,7 @@ int main(int argc, char **argv)
         printf("\nConnection Failed \n");
         return -1;
     }
-    printf("Connected \n");
+    printf("Connected \n");*/
     ros::init(argc, argv, "robot_to_main_communication_node");
     ros::NodeHandle nh;
 

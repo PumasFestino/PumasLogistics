@@ -1792,11 +1792,11 @@ int main(int argc, char** argv)
 	pose_y = transform_rob.getOrigin().y();
     //pose_ori = transform_rob.getOrigin().;
 
-if(TEAM_COLOR == "MAGENTA"){
+/*if(TEAM_COLOR == "MAGENTA"){
 	pose_x -= 0;
 } else {
 	pose_x += 0;
-}
+}*/
 
     pose_ori = 0.0f;
     std::cout << "Coordenadas x: " << pose_x << " y: " << pose_y << std::endl;

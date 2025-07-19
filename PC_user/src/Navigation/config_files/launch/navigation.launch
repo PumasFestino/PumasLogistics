@@ -2,10 +2,17 @@
   <arg name="map_name" default="logistics-2025.yaml"/>
   <arg name="static_map_file" default="$(find config_files)/maps/$(arg map_name)"/>
   <arg name="prohibition_map_file"  default="$(find config_files)/prohibition_maps/logistics-2025-blocked.yaml"/>
-    
-  <arg name="initial_pose_x" default="-1.65"/>
-  <arg name="initial_pose_y" default="-0.247"/>
-  <arg name="initial_pose_a" default="-1.57"/>
+
+  <arg name="color_team" default="CYAN"/>
+
+  <arg if="$(eval color_team == 'CYAN')" name="initial_pose_x" default="2.35"/>
+  <arg if="$(eval color_team == 'CYAN')" name="initial_pose_y" default="-0.247"/>
+  <arg if="$(eval color_team == 'CYAN')" name="initial_pose_a" default="-1.57"/>
+  
+  <arg if="$(eval color_team == 'MAGENTA')" name="initial_pose_x" default="-6.95"/>
+  <arg if="$(eval color_team == 'MAGENTA')" name="initial_pose_y" default="-0.247"/>
+  <arg if="$(eval color_team == 'MAGENTA')" name="initial_pose_a" default="-1.57"/>
+
   <arg name="laser_scan_topic" default="/scan"/>
   <arg name="point_cloud_topic" default="/camera/depth_registered/points"/>
   <arg name="use_lidar" default="True"/>

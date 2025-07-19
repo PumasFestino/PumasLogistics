@@ -16,6 +16,7 @@
 #include <actionlib/client/simple_action_client.h>
 #include <sensor_msgs/LaserScan.h>
 //#include <move_base/move_baseAction.h>
+#include <std_srvs/SetBool.h>
 
 class FestinoNavigation
 {

@@ -59,7 +59,7 @@ bool FestinoNavigation::setNodeHandle(ros::NodeHandle* nh)
     pubNavigationStop      = nh->advertise<std_msgs::Empty>            ("/navigation/stop", 10);
     pubCmdVel              = nh->advertise<geometry_msgs::Twist>       ("/cmd_vel", 10);
     cltMoveBase            = nh->serviceClient<simple_move::MoveBase>  ("/navigation/move_base");
-    cltAlingWithLine       = nh->serviceClient<simple_move::LaserScanAling>  ("/navigation/align_with_line");
+    cltAlingWithLine       = nh->serviceClient<std_srvs::SetBool>("/navigation/align_with_line");
     pubModMap              = nh->advertise<std_msgs::String>           ("/zone_modifications", 1);
 
     tf_listener = new tf::TransformListener();
@@ -216,8 +216,8 @@ void FestinoNavigation::startMoveLateral(float distance)
 void FestinoNavigation::alingWithLine(bool enable)
 {
     std::cout<< "FestinoNavigation.-> Aling with line" << std::endl;
-    simple_move::LaserScanAling srv;
-    srv.request.isAlingEnabled = enable;
+        std_srvs::SetBool srv;
+        srv.request.data = enable;
     if(cltAlingWithLine.call(srv))
     {
         std::cout << "FestinoNavigation.-> Aling with line -- Success: " << srv.response.success << std:: endl;

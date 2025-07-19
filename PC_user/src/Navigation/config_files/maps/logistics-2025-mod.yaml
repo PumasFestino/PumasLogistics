@@ -1,4 +1,4 @@
-image: /home/mercus/PumasLogistics/PC_user/src/Navigation/config_files/maps/logistics-2025-mod.pgm
+image: /home/joshua/PumasLogistics/PC_user/src/Navigation/config_files/maps/logistics-2025-mod.pgm
 resolution: 0.05
 origin: [-13.5, -1.5, 0.0]
 negate: 0
