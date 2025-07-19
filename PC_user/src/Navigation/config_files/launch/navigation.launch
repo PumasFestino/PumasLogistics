@@ -101,7 +101,7 @@
     <param name="laser_min_range" value="0.3"/>
     <param name="odom_model_type" value="omni-corrected"/>
   </node>
-  <!--node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation.rviz"/-->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation_JM.rviz"/>
 
   <!--node name="panic_stop" pkg="act_pln" type="panic_stop.py">
   </node-->

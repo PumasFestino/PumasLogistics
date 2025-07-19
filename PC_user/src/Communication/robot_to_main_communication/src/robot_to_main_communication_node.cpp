@@ -22,16 +22,52 @@ std::vector<std::string> tokens;
 
 // Instrucciones para probar
 std::vector<std::string> demo_instructions = {
+    // FIRST MACHINE
     "move CS M_Z45 0 output",
     "retrieve CS M_Z45 0 output",
-    "move CS M_Z45 180 input"
-    "deliver CS M_Z45 180 input"
+    "move CS M_Z45 0 input",
+    "deliver CS M_Z45 0 input",
+    "move CS M_Z45 0 output",
+    "retrieve CS M_Z45 0 output",
+    "move CS M_Z45 0 input",
+    "deliver CS M_Z45 0 input",
+    "move CS M_Z45 0 output",
+    "retrieve CS M_Z45 0 output",
+    "move CS M_Z45 0 input",
+    "deliver CS M_Z45 0 input",
+    // SECOND MACHINE
+    "move CS M_Z53 0 output",
+    "retrieve CS M_Z53 0 output",
+    "move CS M_Z53 0 input",
+    "deliver CS M_Z53 0 input",
+    "move CS M_Z53 0 output",
+    "retrieve CS M_Z53 0 output",
+    "move CS M_Z53 0 input",
+    "deliver CS M_Z53 0 input",
+    "move CS M_Z53 0 output",
+    "retrieve CS M_Z53 0 output",
+    "move CS M_Z53 0 input",
+    "deliver CS M_Z53 0 input",
+    // THIRD MACHINE
+    "move CS M_Z12 0 output",
+    "retrieve CS M_Z12 0 output",
+    "move CS M_Z12 0 input",
+    "deliver CS M_Z12 0 input",
+    "move CS M_Z12 0 output",
+    "retrieve CS M_Z12 0 output",
+    "move CS M_Z12 0 input",
+    "deliver CS M_Z12 0 input",
+    "move CS M_Z12 0 output",
+    "retrieve CS M_Z12 0 output",
+    "move CS M_Z12 0 input",
+    "deliver CS M_Z12 0 input",
+    // INITIAL POSITION
+    "move CS M_Z55 0"
 };
 
-std::string demo_zone = "M_Z45 M_Z53 M_Z12";
+std::string demo_zones = "M_Z45 0 M_Z53 90 M_Z12 90";
 
 int instruction_index = 0;
-int graspingCounter = 0;
 
 size_t current_zone_index = 20;
 
@@ -48,7 +84,7 @@ void zoneCallback(const std_msgs::String::ConstPtr& msg)
         ROS_INFO(" - %s", z.c_str());
     }
 
-    ret = system("rosrun act_pln main_track &");
+    //ret = system("rosrun act_pln main_track &");
 
     if (ret == 0) {
         ROS_INFO("Main track launched successfully.");
@@ -93,11 +129,7 @@ robot_to_main_communication::InstructionService::Response &res)
         ++instruction_index;
     }
     else if(command == "z"){
-        res.instruction = demo_zone;
-    }
-    else if (graspingCounter < 3){
-        instruction_index = 0;
-        ++graspingCounter;
+        res.instruction = demo_zones;
     }
 
     return true;
@@ -156,7 +188,7 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "robot_to_main_communication_node");
     ros::NodeHandle nh;
 
-    ros::Subscriber zone_sub = nh.subscribe("/zone_msg", 10, zoneCallback);
+    //ros::Subscriber zone_sub = nh.subscribe("/zone_msg", 10, zoneCallback);
     ros::ServiceServer instruction_srv = nh.advertiseService("/instruction_msg", handle_instruction);
     ros::ServiceServer zone_srv = nh.advertiseService("/nav_zones", handle_zone);
 

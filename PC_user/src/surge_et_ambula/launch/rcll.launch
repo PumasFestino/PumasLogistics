@@ -27,5 +27,5 @@
     <node name="pose_robot_station" pkg="festino_task" type="pose_robot_station" output="screen" />
     
     <!--   Rviz   -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation_JM.rviz"/>
+    <!--node name="rviz" pkg="rviz" type="rviz" args="-d $(find config_files)/rviz/festino_navigation_JM.rviz"/-->
 </launch>
