@@ -4,7 +4,7 @@
 #include<arpa/inet.h> 
 
 #define TCPPORT 9002
-#define SERVER_IP "192.168.100.111"
+#define SERVER_IP "192.168.0.101"
 //#define SERVER_IP "192.168.1.106"
 //#define SERVER_IP "192.168.1.163"
 

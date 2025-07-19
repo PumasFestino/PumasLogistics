@@ -57,7 +57,7 @@
 
 
 //#define HOST "172.23.134.255"
-//#define TEAM_COLOR "MAGENTA"
+// #define TEAM_COLOR "MAGENTA"
 #define TEAM_COLOR "CYAN"
 #define TEAM_NAME "Pumas"
 
@@ -948,6 +948,20 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
                                 //ROS_INFO_STREAM(navigation_routes->routes().Get(0).route(i));
                                 my_msg.append(zones_map[navigation_routes->routes().Get(0).route(i)] + " ");
                             }
+
+                               std_msgs::String el_msg;
+                           
+                               //std::stringstream ss;
+                               //ss << my_msg << count;
+                               el_msg.data = my_msg;//ss.str();
+                           
+
+                        ROS_INFO_STREAM(" el mensaje :O " << el_msg.data);
+                        pub_zone.publish(el_msg);
+
+                        zonesSent = false;
+
+
                             /*2 robots, each plan on each robot*/
                             /*
                         if(ROBOT_NO == 1){
@@ -964,18 +978,6 @@ ROS_INFO_STREAM("------          CRYPTO SETUP      --------- ");
                             }
                         }
                         */
-
-                               std_msgs::String el_msg;
-                           
-                               //std::stringstream ss;
-                               //ss << my_msg << count;
-                               el_msg.data = my_msg;//ss.str();
-                           
-
-                        ROS_INFO_STREAM(" el mensaje :O " << el_msg.data);
-                        pub_zone.publish(el_msg);
-
-                        zonesSent = false;
                     }
   /*                                      const char* ch = navigation_routes->ShortDebugString().c_str();
                                         string s = ch;
@@ -1764,7 +1766,7 @@ int main(int argc, char** argv)
 
     //std::thread server_connection_thread(robots_connection);
 
-    ros::Rate r(10);
+    ros::Rate r(100);
     while (ros::ok()) {
   
 //NAVIGATION CHALLENGE
@@ -1791,9 +1793,9 @@ int main(int argc, char** argv)
     //pose_ori = transform_rob.getOrigin().;
 
 if(TEAM_COLOR == "MAGENTA"){
-	pose_x -= 0.01;
+	pose_x -= 0;
 } else {
-	pose_x += 0.01;
+	pose_x += 0;
 }
 
     pose_ori = 0.0f;

@@ -77,10 +77,14 @@ void request_instruction(){
             }else if(instructionTokens[0] == "deliver"){
                 state = SM_DELIVER;
                 return;
-            }else{
+            }else if(instructionTokens[0] == "s"){
                 request = false;
                 return;
             }
+        }else{
+            request = false;
+            ROS_INFO("NOT INSTRUCTION RECEIVED");
+            return;
         }
     } else {
         std::cout << "The instruction is: " <<  instructionTokens[0] << std::endl;  
@@ -180,8 +184,8 @@ int main(int argc, char** argv){
 	    		std::cout << "State machine: SM_INIT" << std::endl;	
 	            std::cout << "I am ready for the main track challenge" << std::endl;
                 
-	    	    //state = SM_WAIT_FOR_ZONES;
-	    	    state = SM_WAIT_FOR_INSTRUCTION;
+	    	    state = SM_WAIT_FOR_ZONES;
+	    	    //state = SM_WAIT_FOR_INSTRUCTION;
 	    		break;
 
             case SM_WAIT_FOR_ZONES:
@@ -237,12 +241,12 @@ int main(int argc, char** argv){
                 request = false;
 	            
                 if(instructionTokens[4] == "shelf"){
-		            std::cout << "State machine -> retrive shelf" << std::endl;
+		            std::cout << "State machine -> retrieve shelf" << std::endl;
                     FestinoTask::grasp("takep");
                 }
                 else
                 {
-                    std::cout << "State machine -> retrive" << std::endl;
+                    std::cout << "State machine -> retrieve" << std::endl;
                     FestinoTask::grasp("take");
                 }
 

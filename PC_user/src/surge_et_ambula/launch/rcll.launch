@@ -10,7 +10,7 @@
 
     <!--   Communication   -->
     <include file="$(find robot_to_main_communication)/launch/robot_to_main_communication.launch" />
-    <node name="refbox_comm_node" pkg="ref_box_comm" type="refbox_comm_node" output="screen"/>
+    <node name="refbox_comm_node" pkg="refbox_comm" type="refbox_comm_node" output="screen"/>
 
     <!--   Move   -->
     <node name="move_base" pkg="simple_move" type="move_base" output="screen" />

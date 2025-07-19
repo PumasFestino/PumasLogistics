@@ -11,7 +11,7 @@
 #include<arpa/inet.h> 
 
 #define TCPPORT 9002
-#define SERVER_IP "192.168.0.255"
+#define SERVER_IP "192.168.0.101"
 
 int client_fd;
 char buffer[50];
@@ -22,18 +22,23 @@ std::vector<std::string> tokens;
 
 // Instrucciones para probar
 std::vector<std::string> demo_instructions = {
-    "move CS C_Z56 45",
-    "move BS C_Z34 0",
-    "move RS C_Z22 90"
+    "move CS M_Z45 0 output",
+    "retrieve CS M_Z45 0 output",
+    "move CS M_Z45 180 input"
+    "deliver CS M_Z45 180 input"
 };
 
-int instruction_index = 0;
+std::string demo_zone = "M_Z45 M_Z53 M_Z12";
 
-size_t current_zone_index = 0;
+int instruction_index = 0;
+int graspingCounter = 0;
+
+size_t current_zone_index = 20;
 
 // Callback para recibir las zonas desde /zone_msg
 void zoneCallback(const std_msgs::String::ConstPtr& msg)
 {
+    int ret;
     zone_queue.clear();
     current_zone_index = 0;
 
@@ -42,13 +47,21 @@ void zoneCallback(const std_msgs::String::ConstPtr& msg)
     for (const auto& z : zone_queue) {
         ROS_INFO(" - %s", z.c_str());
     }
+
+    ret = system("rosrun act_pln main_track &");
+
+    if (ret == 0) {
+        ROS_INFO("Main track launched successfully.");
+    } else {
+        ROS_ERROR("Failed to launch main_track.");
+    }
 }
 
 // Servicio que devuelve una instruccion por cada solicitud
 bool handle_instruction(robot_to_main_communication::InstructionService::Request &req,
 robot_to_main_communication::InstructionService::Response &res)
 {
-    int valread = 0;
+    /*int valread = 0;
     std::string command = req.request;
 
     std::stringstream ss;
@@ -70,17 +83,25 @@ robot_to_main_communication::InstructionService::Response &res)
     }
 
     return true;
+    */
 
-    /*****************  TESTING **************************
-    res.instruction = demo_instructions[instruction_index];
-    instruction_index++;
+    /*****************  TESTING / GRASPING CHALLENGE **************************/
+    std::string command = req.request;
 
-    if (instruction_index == demo_instructions.size()){
+    if (command == "n" && instruction_index < demo_instructions.size()){
+        res.instruction = demo_instructions[instruction_index];
+        ++instruction_index;
+    }
+    else if(command == "z"){
+        res.instruction = demo_zone;
+    }
+    else if (graspingCounter < 3){
         instruction_index = 0;
+        ++graspingCounter;
     }
 
     return true;
-    ******************************************************/
+    /**************************************************************************/
 }
 
 // Servicio que devuelve una zona por cada solicitud "true"
@@ -88,7 +109,7 @@ bool handle_zone(robot_to_main_communication::ZoneService::Request &req,
 robot_to_main_communication::ZoneService::Response &res)
 { 
     if (req.request == "true") {
-        if (current_zone_index <= zone_queue.size()) {
+        if (current_zone_index < zone_queue.size()) {
             res.zone = "move CS " + zone_queue[current_zone_index++] + " 0 " + "";
             ROS_INFO("Enviando zona: %s", res.zone.c_str());
         } else {
@@ -104,6 +125,34 @@ robot_to_main_communication::ZoneService::Response &res)
 
 int main(int argc, char **argv)
 {
+
+    int status;
+    struct sockaddr_in serv_addr;
+    if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        printf("\n Socket creation error \n");
+        return -1;
+    }
+ 
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(TCPPORT);
+ 
+    // Convert IPv4 and IPv6 addresses from text to binary
+    // form
+    if (inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr)
+        <= 0) {
+        printf(
+            "\nInvalid address/ Address not supported \n");
+        return -1;
+    }
+ 
+    if ((status
+         = connect(client_fd, (struct sockaddr*)&serv_addr,
+                   sizeof(serv_addr)))
+        < 0) {
+        printf("\nConnection Failed \n");
+        return -1;
+    }
+    printf("Connected \n");
     ros::init(argc, argv, "robot_to_main_communication_node");
     ros::NodeHandle nh;
 
@@ -113,7 +162,9 @@ int main(int argc, char **argv)
 
     ROS_INFO("Servicio /instruction_msg listo");
     ROS_INFO("Servicio /nav_zones listo");
+    zone_queue.clear();
     ros::spin();
+
 
     return 0;
 }
