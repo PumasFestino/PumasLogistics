@@ -1,3 +1,0 @@
-[console_scripts]
-voice_listener = Voice.voice_listener:main
-voice_talker = Voice.voice_talker:main

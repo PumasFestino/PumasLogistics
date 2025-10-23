@@ -1,9 +1,0 @@
-Metadata-Version: 2.1
-Name: Voice
-Version: 0.0.0
-Summary: Package description
-Maintainer: vero
-Maintainer-email: veronica.morales.tepale@gmail.com
-License: Apache-2.0
-Provides-Extra: test
-License-File: LICENSE
