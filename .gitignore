@@ -9,4 +9,5 @@ PC_user/build/
 PC_user/install/
 PC_user/log/
 PC_user/.vscode/
+data/
 .vscode/

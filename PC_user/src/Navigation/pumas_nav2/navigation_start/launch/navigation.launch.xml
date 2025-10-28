@@ -6,8 +6,8 @@
   <arg name="namespace_nav" default=""/>
 
   <!-- ===== Map server args ===== -->
-  <arg name="static_map_file" default="$(find-pkg-share navigation_start)/maps/maps/wrs2020/map.yaml"/>
-  <arg name="prohibition_map_file" default="$(find-pkg-share navigation_start)/maps/prohibition_maps/wrs2020/map.yaml"/>
+  <arg name="static_map_file" default="$(find-pkg-share navigation_start)/maps/maps/lab2025/map.yaml"/>
+  <arg name="prohibition_map_file" default="$(find-pkg-share navigation_start)/maps/maps/lab2025/map.yaml"/>
 
   <!-- ===== Topic args (I/O) ===== -->
   <arg name="pose_topic" default="pose"/>

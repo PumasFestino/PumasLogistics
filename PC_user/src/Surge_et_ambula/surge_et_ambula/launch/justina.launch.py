@@ -6,6 +6,7 @@ from launch.substitutions import LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
+from launch.conditions import IfCondition  # <-- NUEVO
 
 def generate_launch_description():
     # === For Festo Base (robotino) ===
@@ -49,12 +50,14 @@ def generate_launch_description():
     )
 
     # === Navigation Launch ===
+    use_nav        = DeclareLaunchArgument('use_nav',         default_value='true',        description='Launch navigation stack')
     navigation_launch = ExecuteProcess(
         cmd=[
             'ros2', 'launch', 'navigation_start', 'navigation.launch.xml',
-            'namespace:=hardware/robotino'
+            'namespace:=hardware/robotino'  # puedes dejarlo fijo o reemplazar por tu LaunchConfiguration si gustas
         ],
-        output='screen'
+        output='screen',
+        condition=IfCondition(LaunchConfiguration('use_nav'))  # <-- NUEVO
     )
 
     # === RViz2 Launch ===
@@ -76,7 +79,8 @@ def generate_launch_description():
     return LaunchDescription([
         namespace, use_sim_time, launch_jsb, robot_description,
         hostname, rsp_freq, bumper_timeout, motor_timeout, launch_odom_tf,
+        use_nav,                         # <-- NUEVO
         included_launch,
-        #navigation_launch,
+        navigation_launch,
         rviz_node
     ])
